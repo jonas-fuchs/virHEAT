@@ -177,7 +177,7 @@ def create_track_dict(unique_mutations, gff3_info):
                 )
 
     # create a dict and sort
-    gene_dict = {element[0]:[element[1:4] ]for element in genes_with_mutations}
+    gene_dict = {element[0]: [element[1:4]] for element in genes_with_mutations}
     gene_dict = dict(sorted(gene_dict.items(), key=lambda x: x[1][0]))
 
     # remember for each track the largest stop

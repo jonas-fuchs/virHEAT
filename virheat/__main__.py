@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from varvamp import command
+from virheat import command
 
 if __name__ == '__main__':
     command.main()

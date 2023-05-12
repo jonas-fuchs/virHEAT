@@ -2,16 +2,12 @@
 contains all plotting functions of virHEAT
 """
 
-
 # BUILT-INS
 import math
 
 # LIBS
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
-from matplotlib import cm
-from matplotlib import colors
-from matplotlib import colormaps
 
 
 def create_heatmap(ax, frequency_array, cmap):
