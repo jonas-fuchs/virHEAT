@@ -1,5 +1,10 @@
+"""
+contains all data prep functions of virHEAT
+"""
+
 # BUILT-INS
 import os
+import re
 import pathlib
 
 # LIBS
@@ -11,7 +16,21 @@ def get_vcf_files(path):
     """
     returns a list of vcf files in a paticular folder
     """
-    return sorted(list(pathlib.Path(path).glob('*.vcf')))
+    return list(pathlib.Path(path).glob('*.vcf'))
+
+
+def get_digit_and_alpha(filename):
+    """
+    get digits and alpha in file names
+    """
+    digit_match = re.search(r'\d+', filename)
+    if digit_match:
+        digit = digit_match.group()
+        alpha = re.sub(r'\d+', '', filename)
+    else:
+        digit = ''
+        alpha = filename
+    return (alpha, int(digit) if digit else float('inf'))
 
 
 def extract_vcf_data(vcf_files, threshold=0):

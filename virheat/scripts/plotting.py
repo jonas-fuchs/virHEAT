@@ -1,3 +1,8 @@
+"""
+contains all plotting functions of virHEAT
+"""
+
+
 # BUILT-INS
 import math
 
@@ -66,7 +71,7 @@ def create_genome_vis(ax, genome_y_location, n_mutations, unique_mutations, geno
     return mutation_set
 
 
-def create_colorbar(threshold, cmap):
+def create_colorbar(threshold, cmap, track_y_location, n_samples):
     """
     creates a custom colorbar and annotates the threshold
     """
@@ -84,12 +89,12 @@ def create_colorbar(threshold, cmap):
     ticks.append(threshold)
     labels.append(f"threshold\n={threshold}")
 
-    cbar = plt.colorbar(cmap, label="variant frequency", pad=0, shrink=0.75, anchor=(0.1, 1))
+    cbar = plt.colorbar(cmap, label="variant frequency", pad=0, shrink=n_samples/(track_y_location+n_samples), anchor=(0.1, 1))
     cbar.set_ticks(ticks)
     cbar.set_ticklabels(labels)
 
 
-def create_mutation_legend(mutation_set):
+def create_mutation_legend(mutation_set, track_y_location, n_samples):
     """
     create a legend for the mutation type
     """
@@ -102,10 +107,10 @@ def create_mutation_legend(mutation_set):
     if "SNV" in mutation_set:
         legend_patches.append(patches.Patch(color="dimgrey", label="SNV"))
 
-    plt.legend(bbox_to_anchor=(1.01, 0.2), handles=legend_patches)
+    plt.legend(bbox_to_anchor=(1.01, 0.95-(n_samples/(track_y_location+n_samples))), handles=legend_patches)
 
 
-def create_axis(ax, n_mutations, track_y_location, n_samples, file_names, genome_end):
+def create_axis(ax, n_mutations, track_y_location, n_samples, file_names, genome_end, genome_y_location, unique_mutations):
     """
     create the axis of the plot
     """
@@ -124,7 +129,42 @@ def create_axis(ax, n_mutations, track_y_location, n_samples, file_names, genome
     # set y axis labels
     y_ticks = [idx+0.5 for idx in range(0, len(file_names))]
     ax.set_yticks(y_ticks, file_names)
+    # set second x axis for mut pos
+    secxtick_labels = []
+    secxtick_ticks = []
+    for idx, mut in enumerate(unique_mutations):
+        secxtick_labels.append(mut.split("_")[0])
+        secxtick_ticks.append(idx+0.5)
+    secax = ax.secondary_xaxis("top")
+    secax.set_xticks(secxtick_ticks, secxtick_labels, rotation=90)
     # set spine visibility
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
-    ax.spines['left'].set_visible(False)
+    ax.spines["bottom"].set_position(("data", -genome_y_location))
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+    ax.spines["left"].set_visible(False)
+
+
+def create_gene_vis(ax, genes_with_mutations, n_mutations, y_size, n_tracks, genome_end, track_y_location, genome_y_location, colors_genes):
+    """
+    create the vis for the gene
+    """
+
+    gene_annotations = []
+    mult_factor = n_mutations/genome_end
+
+    for idx, gene in enumerate(genes_with_mutations):
+        start = (mult_factor*genes_with_mutations[gene][0][0], -track_y_location+(n_tracks-genes_with_mutations[gene][1])*genome_y_location/4-genome_y_location/4)
+        stop = mult_factor*genes_with_mutations[gene][0][1]
+        height = genome_y_location/2
+        ax.add_patch(
+            patches.FancyBboxPatch(
+                                start, stop-start[0], height,
+                                boxstyle="round,pad=-0.0040,rounding_size=0.03",
+                                ec="black", fc=colors_genes[idx]
+                            )
+        )
+        # define text pos for gene description inside or below the gene box, depending if it fits within
+        if stop-start[0] > n_mutations/(y_size*8)*len(gene):
+            gene_annotations.append(ax.text(start[0]+(stop-start[0])/2, start[1]+height/2, gene, ha="center", va="center"))
+        else:
+            gene_annotations.append(ax.text(start[0]+(stop-start[0])/2, start[1]-height/4, gene, ha="center", va="center"))
