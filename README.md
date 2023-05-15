@@ -1,7 +1,7 @@
 <img src="./virheat.png" alt="virHEAT logo" />
 
 
-**virHEAT is a tool to visualize vcf files as a heatmap and map positions to a gff file.**
+**virHEAT is a tool to visualize vcfs as a heatmap and map mutations to respective genes.**
 
 
 
