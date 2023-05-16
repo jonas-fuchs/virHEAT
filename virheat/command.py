@@ -148,7 +148,3 @@ def main(sysargs=sys.argv[1:]):
 
     # save fig
     fig.savefig(os.path.join(args.input[1], "virHEAT_plot.pdf"), bbox_inches="tight")
-
-
-if __name__ == "__main__":
-    main()
