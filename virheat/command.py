@@ -51,21 +51,19 @@ def get_args(sysargs):
     parser.add_argument(
         "-t",
         "--threshold",
-        type=int,
+        type=float,
         metavar="0",
         default=0,
         help="min frequency threshold to display"
     )
     parser.add_argument(
-        "-d",
-        "--delete-common",
+        "--delete",
         action=argparse.BooleanOptionalAction,
         default=True,
         help="delete mutations with frequencies present in all samples"
     )
     parser.add_argument(
-        "-s",
-        "--sort-alphanumerically",
+        "--sort",
         action=argparse.BooleanOptionalAction,
         default=False,
         help="sort alphanumerically"
@@ -93,13 +91,13 @@ def main(sysargs=sys.argv[1:]):
 
     # get vcf files and sort
     vcf_files = data_prep.get_vcf_files(args.input[0])
-    if args.sort_alphanumerically:
+    if args.sort:
         vcf_files = sorted(vcf_files, key=lambda x: data_prep.get_digit_and_alpha(os.path.basename(x)))
 
     # extract vcf info
     frequency_lists, unique_mutations, file_names = data_prep.extract_vcf_data(vcf_files, threshold=args.threshold)
     frequency_array = data_prep.create_freq_array(unique_mutations, frequency_lists)
-    if args.delete_common:
+    if args.delete:
         frequency_array = data_prep.delete_common_mutations(frequency_array, unique_mutations)
 
     # define relative locations of all items in the plot
