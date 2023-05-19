@@ -26,11 +26,11 @@ def get_args(sysargs):
     """
     parser = argparse.ArgumentParser(
         prog=_program,
-        usage='''\tvirheat <folder containg vcfs> <output dir> -l or -g [additional arguments]''')
+        usage='''\tvirheat <folder containing vcfs> <output dir> -l or -g [additional arguments]''')
     parser.add_argument(
         "input",
         nargs=2,
-        help="folder containg vcfs and output folder"
+        help="folder containing vcf files and output folder"
     )
     parser.add_argument(
         "-l",
@@ -54,7 +54,7 @@ def get_args(sysargs):
         type=int,
         metavar="0",
         default=0,
-        help="min frequency threshold to display"
+        help="display frequencies above this threshold"
     )
     parser.add_argument(
         "-d",
