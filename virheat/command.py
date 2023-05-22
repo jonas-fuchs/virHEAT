@@ -51,7 +51,7 @@ def get_args(sysargs):
     parser.add_argument(
         "-t",
         "--threshold",
-        type=int,
+        type=float,
         metavar="0",
         default=0,
         help="display frequencies above this threshold"

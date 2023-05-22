@@ -129,7 +129,8 @@ def create_axis(ax, n_mutations, track_y_location, n_samples, file_names, genome
     secxtick_labels = []
     secxtick_ticks = []
     for idx, mut in enumerate(unique_mutations):
-        secxtick_labels.append(mut.split("_")[0])
+        mutation = mut.split("_")
+        secxtick_labels.append(f"{mutation[1]}{mutation[0]}{mutation[2]}")
         secxtick_ticks.append(idx+0.5)
     secax = ax.secondary_xaxis("top")
     secax.set_xticks(secxtick_ticks, secxtick_labels, rotation=90)
