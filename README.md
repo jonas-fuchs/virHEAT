@@ -1,4 +1,7 @@
-<img src="https://github.com/jonas-fuchs/virHEAT/blob/master/virheat.png" alt="virHEAT logo" />
+[![CodeFactor](https://www.codefactor.io/repository/github/jonas-fuchs/virheat/badge)](https://www.codefactor.io/repository/github/jonas-fuchs/virheat)
+[![DOI](https://zenodo.org/badge/639918477.svg)](https://zenodo.org/badge/latestdoi/639918477)
+
+[![Logo](https://github.com/jonas-fuchs/virHEAT/blob/master/virheat.png)](https://github.com/jonas-fuchs/virHEAT/blob/master/virheat.png)
 
 
 **virHEAT is a tool to visualize vcfs as a heatmap and map mutations to respective genes.**
@@ -9,8 +12,7 @@ Ever wanted to have a condensed look at variant frequencies after mapping your r
 
 ## SARS-CoV-2 example:
 
-<img src="https://github.com/jonas-fuchs/virHEAT/blob/master/example.png" alt="example plot" />
-
+[![Example](https://github.com/jonas-fuchs/virHEAT/blob/master/example.png)](https://github.com/jonas-fuchs/virHEAT/blob/master/example.png)
 
 ## Installation
 
