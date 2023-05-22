@@ -67,7 +67,7 @@ def create_genome_vis(ax, genome_y_location, n_mutations, unique_mutations, geno
     return mutation_set
 
 
-def create_colorbar(threshold, cmap, track_y_location, n_samples):
+def create_colorbar(threshold, cmap, min_y_location, n_samples):
     """
     creates a custom colorbar and annotates the threshold
     """
@@ -85,12 +85,12 @@ def create_colorbar(threshold, cmap, track_y_location, n_samples):
     ticks.append(threshold)
     labels.append(f"threshold\n={threshold}")
 
-    cbar = plt.colorbar(cmap, label="variant frequency", pad=0, shrink=n_samples/(track_y_location+n_samples), anchor=(0.1, 1))
+    cbar = plt.colorbar(cmap, label="variant frequency", pad=0, shrink=n_samples/(min_y_location+n_samples), anchor=(0.1, 1))
     cbar.set_ticks(ticks)
     cbar.set_ticklabels(labels)
 
 
-def create_mutation_legend(mutation_set, track_y_location, n_samples):
+def create_mutation_legend(mutation_set, min_y_location, n_samples):
     """
     create a legend for the mutation type
     """
@@ -103,17 +103,17 @@ def create_mutation_legend(mutation_set, track_y_location, n_samples):
     if "SNV" in mutation_set:
         legend_patches.append(patches.Patch(color="dimgrey", label="SNV"))
 
-    plt.legend(bbox_to_anchor=(1.01, 0.95-(n_samples/(track_y_location+n_samples))), handles=legend_patches)
+    plt.legend(bbox_to_anchor=(1.01, 0.95-(n_samples/(min_y_location+n_samples))), handles=legend_patches)
 
 
-def create_axis(ax, n_mutations, track_y_location, n_samples, file_names, genome_end, genome_y_location, unique_mutations):
+def create_axis(ax, n_mutations, min_y_location, n_samples, file_names, genome_end, genome_y_location, unique_mutations, reference_name):
     """
     create the axis of the plot
     """
 
     # define plot limits
     ax.set_xlim(0, n_mutations)
-    ax.set_ylim(-track_y_location, n_samples)
+    ax.set_ylim(-min_y_location, n_samples)
     # define new ticks depending on the genome size
     xtick_dis = round(genome_end/6, -int(math.log10(genome_end/6))+1)
     xtick_labels = [0, xtick_dis, xtick_dis*2, xtick_dis*3, xtick_dis*4, xtick_dis*5, genome_end]
@@ -124,12 +124,15 @@ def create_axis(ax, n_mutations, track_y_location, n_samples, file_names, genome
     ax.set_xticks(xticks, xtick_labels)
     # set y axis labels
     y_ticks = [idx+0.5 for idx in range(0, len(file_names))]
+    y_ticks.append(-genome_y_location+genome_y_location/4)
+    file_names.append(reference_name)
     ax.set_yticks(y_ticks, file_names)
     # set second x axis for mut pos
     secxtick_labels = []
     secxtick_ticks = []
     for idx, mut in enumerate(unique_mutations):
-        secxtick_labels.append(mut.split("_")[0])
+        mutation = mut.split("_")
+        secxtick_labels.append(f"{mutation[1]}{mutation[0]}{mutation[2]}")
         secxtick_ticks.append(idx+0.5)
     secax = ax.secondary_xaxis("top")
     secax.set_xticks(secxtick_ticks, secxtick_labels, rotation=90)
@@ -140,7 +143,7 @@ def create_axis(ax, n_mutations, track_y_location, n_samples, file_names, genome
     ax.spines["left"].set_visible(False)
 
 
-def create_gene_vis(ax, genes_with_mutations, n_mutations, y_size, n_tracks, genome_end, track_y_location, genome_y_location, colors_genes):
+def create_gene_vis(ax, genes_with_mutations, n_mutations, y_size, n_tracks, genome_end, min_y_location, genome_y_location, colors_genes):
     """
     create the vis for the gene
     """
@@ -149,7 +152,7 @@ def create_gene_vis(ax, genes_with_mutations, n_mutations, y_size, n_tracks, gen
     mult_factor = n_mutations/genome_end
 
     for idx, gene in enumerate(genes_with_mutations):
-        start = (mult_factor*genes_with_mutations[gene][0][0], -track_y_location+(n_tracks-genes_with_mutations[gene][1])*genome_y_location/4-genome_y_location/4)
+        start = (mult_factor*genes_with_mutations[gene][0][0], -min_y_location+(n_tracks-genes_with_mutations[gene][1])*genome_y_location/4-genome_y_location/4)
         stop = mult_factor*genes_with_mutations[gene][0][1]
         height = genome_y_location/2
         ax.add_patch(

@@ -26,11 +26,11 @@ def get_args(sysargs):
     """
     parser = argparse.ArgumentParser(
         prog=_program,
-        usage='''\tvirheat <folder containg vcfs> <output dir> -l or -g [additional arguments]''')
+        usage='''\tvirheat <folder containing vcfs> <output dir> -l or -g [additional arguments]''')
     parser.add_argument(
         "input",
         nargs=2,
-        help="folder containg vcfs and output folder"
+        help="folder containing vcf files and output folder"
     )
     parser.add_argument(
         "-l",
@@ -54,7 +54,7 @@ def get_args(sysargs):
         type=float,
         metavar="0",
         default=0,
-        help="min frequency threshold to display"
+        help="display frequencies above this threshold"
     )
     parser.add_argument(
         "--delete",
@@ -95,7 +95,7 @@ def main(sysargs=sys.argv[1:]):
         vcf_files = sorted(vcf_files, key=lambda x: data_prep.get_digit_and_alpha(os.path.basename(x)))
 
     # extract vcf info
-    frequency_lists, unique_mutations, file_names = data_prep.extract_vcf_data(vcf_files, threshold=args.threshold)
+    reference_name, frequency_lists, unique_mutations, file_names = data_prep.extract_vcf_data(vcf_files, threshold=args.threshold)
     frequency_array = data_prep.create_freq_array(unique_mutations, frequency_lists)
     if args.delete:
         frequency_array = data_prep.delete_common_mutations(frequency_array, unique_mutations)
@@ -106,8 +106,13 @@ def main(sysargs=sys.argv[1:]):
     genome_y_location = n_samples/4
 
     # gff3 data extraction
-    if args.gff3_path is not None:
-        gff3_info = data_prep.parse_gff3(args.gff3_path)
+    if args.gff3_path is not None and args.genome_length is not None:
+        sys.exit("\033[31m\033[1mERROR:\033[0m Do not provide the -g and -l argument simultaneously!")
+    elif args.gff3_path is not None:
+        gff3_info, gff3_ref_name = data_prep.parse_gff3(args.gff3_path)
+        # issue a warning if #CHROM and gff3 do not match
+        if gff3_ref_name not in reference_name and reference_name not in gff3_ref_name:
+            print("\033[31m\033[WARNING:\033[0m gff3 reference does not match the vcf reference!")
         genome_end = data_prep.get_genome_end(gff3_info)
         genes_with_mutations, n_tracks = data_prep.create_track_dict(unique_mutations, gff3_info)
         # define space for the genome vis tracks
@@ -136,7 +141,7 @@ def main(sysargs=sys.argv[1:]):
         colors_genes = [cmap_genes(i) for i in range(len(genes_with_mutations))]
         # plot gene track
         plotting.create_gene_vis(ax, genes_with_mutations, n_mutations, y_size, n_tracks, genome_end, min_y_location, genome_y_location, colors_genes)
-    plotting.create_axis(ax, n_mutations, min_y_location, n_samples, file_names, genome_end, genome_y_location, unique_mutations)
+    plotting.create_axis(ax, n_mutations, min_y_location, n_samples, file_names, genome_end, genome_y_location, unique_mutations, reference_name)
     plotting.create_colorbar(args.threshold, cmap_cells, min_y_location, n_samples)
     plotting.create_mutation_legend(mutation_set, min_y_location, n_samples)
 
@@ -146,7 +151,3 @@ def main(sysargs=sys.argv[1:]):
 
     # save fig
     fig.savefig(os.path.join(args.input[1], "virHEAT_plot.pdf"), bbox_inches="tight")
-
-
-if __name__ == "__main__":
-    main()

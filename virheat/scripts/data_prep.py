@@ -58,7 +58,7 @@ def extract_vcf_data(vcf_files, threshold=0):
         {x[0] for li in frequency_lists for x in li}, key=lambda x: int(x.split("_")[0])
     )
 
-    return frequency_lists, unique_mutations, file_names
+    return line.CHROM, frequency_lists, unique_mutations, file_names
 
 
 def create_freq_array(unique_mutations, frequency_lists):
@@ -117,6 +117,7 @@ def parse_gff3(file):
             if line.startswith("#") or line == "\n":
                 continue
             gff_values = line.split("\t")
+            gff3_ref_name = gff_values[0]
             # create keys
             if gff_values[2] not in gff3_dict:
                 gff3_dict[gff_values[2]] = {}
@@ -137,7 +138,7 @@ def parse_gff3(file):
 
     gff3_file.close()
 
-    return gff3_dict
+    return gff3_dict, gff3_ref_name
 
 
 def get_genome_end(gff3_dict):
