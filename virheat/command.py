@@ -72,7 +72,7 @@ def get_args(sysargs):
         "-v",
         "--version",
         action='version',
-        version=f"varvamp {__version__}"
+        version=f"virheat {__version__}"
     )
     if len(sysargs) < 1:
         parser.print_help()
