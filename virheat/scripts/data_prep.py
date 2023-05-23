@@ -9,7 +9,6 @@ import pathlib
 
 # LIBS
 import numpy as np
-import vcfpy as vcf
 
 
 def get_vcf_files(path):
@@ -33,6 +32,72 @@ def get_digit_and_alpha(filename):
     return (alpha, int(digit) if digit else float('inf'))
 
 
+def convert_string(string):
+    """
+    converts string to its right type
+    """
+    string = string.replace("\n", "")
+    if string.isdecimal():
+        return(int(string))
+    elif string.replace('.', '', 1).isdecimal():
+        return(float(string))
+    else:
+        return string
+
+
+def read_vcf(vcf_file):
+    """
+    parse vcf files to dictionary
+    """
+    vcf_dict = {}
+
+    # get header and values
+    with open(vcf_file, "r") as f:
+        header = [l.split("\t") for l in f if l.startswith('#CHROM')][0]
+    # get each line as frequency_lists
+    with open(vcf_file, "r") as f:
+        lines = [l.split("\t") for l in f if not l.startswith('#')]
+    # check if vcf is empty
+    if not lines:
+        print(f"WARNING: {vcf_file} is empty!")
+    # get standard headers as keys
+    for key in header[0:6]:
+        vcf_dict[key] = []
+    # functional effect
+    vcf_dict["TYPE"] = []
+    # info field
+    for line in lines:
+        for info in line[7].split(";"):
+            if "=" in info:
+                vcf_dict[info.split("=")[0]] = []
+    # fill in dictionary
+    for line in lines:
+        # remember keys that have an entry already
+        visited_keys = []
+        for idx, key in enumerate(header[0:6]):
+            vcf_dict[key].append(convert_string(line[idx]))
+        # get mutation type
+        if len(line[3]) == len(line[4]):
+            vcf_dict["TYPE"].append("SNV")
+        elif len(line[3]) < len(line[4]):
+            vcf_dict["TYPE"].append("INS")
+        elif len(line[3]) > len(line[4]):
+            vcf_dict["TYPE"].append("DEL")
+        visited_keys.extend(header[0:6])
+        visited_keys.append("TYPE")
+        # get data from info field
+        for info in line[7].split(";"):
+            if "=" in info:
+                key, val = info.split("=")
+                vcf_dict[key].append(convert_string(val))
+                visited_keys.append(key)
+        # append none for ech none vistited key
+        for key in [k for k in vcf_dict.keys() if k not in visited_keys]:
+            vcf_dict[key].append(None)
+
+    return vcf_dict
+
+
 def extract_vcf_data(vcf_files, threshold=0):
     """
     extract relevant vcf data
@@ -43,14 +108,14 @@ def extract_vcf_data(vcf_files, threshold=0):
 
     for file in vcf_files:
         file_names.append(os.path.splitext(os.path.basename(file))[0])
-        vcf_reader = vcf.Reader.from_path(file)
+        vcf_dict = read_vcf(file)
         frequency_list = []
         # write all mutation info in a '_' sep string
-        for line in vcf_reader:
-            if not line.INFO["AF"] >= threshold:
+        for idx in range(0, len(vcf_dict["#CHROM"])):
+            if not vcf_dict["AF"][idx] >= threshold:
                 continue
             frequency_list.append(
-                (f"{line.POS}_{line.REF}_{[alt.value for alt in line.ALT][0]}_{[alt.type for alt in line.ALT][0]}", line.INFO["AF"])
+                (f"{vcf_dict['POS'][idx]}_{vcf_dict['REF'][idx]}_{vcf_dict['ALT'][idx]}_{vcf_dict['TYPE'][idx]}", vcf_dict['AF'][idx])
             )
         frequency_lists.append(frequency_list)
     # sort by mutation index
@@ -58,7 +123,7 @@ def extract_vcf_data(vcf_files, threshold=0):
         {x[0] for li in frequency_lists for x in li}, key=lambda x: int(x.split("_")[0])
     )
 
-    return line.CHROM, frequency_lists, unique_mutations, file_names
+    return vcf_dict["#CHROM"][0], frequency_lists, unique_mutations, file_names
 
 
 def create_freq_array(unique_mutations, frequency_lists):

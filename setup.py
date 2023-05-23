@@ -17,7 +17,6 @@ setup(
     install_requires=[
         "matplotlib>=3.5.1",
         "numpy>=1.23.3",
-        "vcfpy>=0.13.6"
     ],
     description='virHEAT creates a heatmap from vcf files and maps positions onto a reference genome.',
     url='https://github.com/jonas-fuchs/virHEAT',
