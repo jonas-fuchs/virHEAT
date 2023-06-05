@@ -103,7 +103,7 @@ def main(sysargs=sys.argv[1:]):
     # define relative locations of all items in the plot
     n_samples = len(frequency_array)
     n_mutations = len(frequency_array[0])
-    if n_samples <= 8:
+    if n_samples < 4:
         genome_y_location = 2
     else:
         genome_y_location = math.log2(n_samples)
@@ -140,7 +140,7 @@ def main(sysargs=sys.argv[1:]):
     mutation_set = plotting.create_genome_vis(ax, genome_y_location, n_mutations, unique_mutations, genome_end)
     if args.gff3_path is not None:
         # distinct colors for the genes
-        cmap_genes = plt.get_cmap("tab20")
+        cmap_genes = plt.get_cmap('tab20', len(genes_with_mutations))
         colors_genes = [cmap_genes(i) for i in range(len(genes_with_mutations))]
         # plot gene track
         plotting.create_gene_vis(ax, genes_with_mutations, n_mutations, y_size, n_tracks, genome_end, min_y_location, genome_y_location, colors_genes)
@@ -154,3 +154,4 @@ def main(sysargs=sys.argv[1:]):
 
     # save fig
     fig.savefig(os.path.join(args.input[1], "virHEAT_plot.pdf"), bbox_inches="tight")
+
