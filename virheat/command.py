@@ -1,10 +1,10 @@
 """
 contains the main workflow of virHEAT
 """
-
 # BUILT-INS
 import os
 import sys
+import math
 import argparse
 
 # LIB
@@ -103,7 +103,10 @@ def main(sysargs=sys.argv[1:]):
     # define relative locations of all items in the plot
     n_samples = len(frequency_array)
     n_mutations = len(frequency_array[0])
-    genome_y_location = n_samples/4
+    if n_samples < 4:
+        genome_y_location = 2
+    else:
+        genome_y_location = math.log2(n_samples)
 
     # gff3 data extraction
     if args.gff3_path is not None and args.genome_length is not None:
@@ -116,7 +119,7 @@ def main(sysargs=sys.argv[1:]):
         genome_end = data_prep.get_genome_end(gff3_info)
         genes_with_mutations, n_tracks = data_prep.create_track_dict(unique_mutations, gff3_info)
         # define space for the genome vis tracks
-        min_y_location = genome_y_location + genome_y_location/4 * (n_tracks+2)
+        min_y_location = genome_y_location + genome_y_location/2 * (n_tracks+1)
     elif args.genome_length is not None:
         genome_end = args.genome_length
         min_y_location = genome_y_location
@@ -126,7 +129,7 @@ def main(sysargs=sys.argv[1:]):
     # define size of the plot
     y_size = (n_mutations)*0.4
     x_size = y_size*(n_samples+min_y_location)/n_mutations
-    x_size = x_size-x_size*1/6  # compensate of heatmap annotation
+    x_size = x_size-x_size*0.15  # compensate of heatmap annotation
 
     # ini the fig
     fig, ax = plt.subplots(figsize=[y_size, x_size])
@@ -137,12 +140,12 @@ def main(sysargs=sys.argv[1:]):
     mutation_set = plotting.create_genome_vis(ax, genome_y_location, n_mutations, unique_mutations, genome_end)
     if args.gff3_path is not None:
         # distinct colors for the genes
-        cmap_genes = plt.get_cmap("tab20")
+        cmap_genes = plt.get_cmap('tab20', len(genes_with_mutations))
         colors_genes = [cmap_genes(i) for i in range(len(genes_with_mutations))]
         # plot gene track
         plotting.create_gene_vis(ax, genes_with_mutations, n_mutations, y_size, n_tracks, genome_end, min_y_location, genome_y_location, colors_genes)
     plotting.create_axis(ax, n_mutations, min_y_location, n_samples, file_names, genome_end, genome_y_location, unique_mutations, reference_name)
-    plotting.create_colorbar(args.threshold, cmap_cells, min_y_location, n_samples)
+    plotting.create_colorbar(args.threshold, cmap_cells, min_y_location, n_samples, n_mutations)
     plotting.create_mutation_legend(mutation_set, min_y_location, n_samples)
 
     # create output folder
@@ -151,3 +154,4 @@ def main(sysargs=sys.argv[1:]):
 
     # save fig
     fig.savefig(os.path.join(args.input[1], "virHEAT_plot.pdf"), bbox_inches="tight")
+
