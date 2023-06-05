@@ -126,7 +126,7 @@ def main(sysargs=sys.argv[1:]):
     # define size of the plot
     y_size = (n_mutations)*0.4
     x_size = y_size*(n_samples+min_y_location)/n_mutations
-    x_size = x_size-x_size*1/6  # compensate of heatmap annotation
+    x_size = x_size-x_size*0.15  # compensate of heatmap annotation
 
     # ini the fig
     fig, ax = plt.subplots(figsize=[y_size, x_size])
