@@ -4,7 +4,7 @@
 [![License: GPL v3](https://img.shields.io/github/license/jonas-fuchs/virheat)](https://www.gnu.org/licenses/gpl-3.0)
 [![pypi version](https://img.shields.io/pypi/v/virheat)](https://pypi.org/project/virheat/)
 
-[![Logo](https://github.com/jonas-fuchs/virHEAT/blob/master/virheat.png)](https://github.com/jonas-fuchs/virHEAT/blob/master/virheat.png)
+[![Logo](./virheat.png)]
 
 
 
@@ -16,7 +16,7 @@ Ever wanted to have a condensed look at variant frequencies after mapping your r
 
 ## SARS-CoV-2 example:
 
-[![Example](https://github.com/jonas-fuchs/virHEAT/blob/master/example.png)](https://github.com/jonas-fuchs/virHEAT/blob/master/example.png)
+[![Example](example_data/example.png)]
 
 ## Installation
 
@@ -72,11 +72,6 @@ optional arguments:
 ```
 
 You need to either provide the length of your reference genome or if you want to get the sequence annotation you will need to provide the gff3 file.
-
-## Planned features
-
-- Clustering
-- Interactive mode
 
 ---
 
