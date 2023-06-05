@@ -90,8 +90,7 @@ def create_colorbar(threshold, cmap, min_y_location, n_samples, n_mutations):
         labels.remove(rounded_threshold)
     ticks.append(threshold)
     labels.append(f"threshold\n={threshold}")
-
-    cbar = plt.colorbar(cmap, label="variant frequency", pad=0, shrink=n_samples/(min_y_location+n_samples), anchor=(0.1, 1), aspect=n_mutations/math.log2(n_samples))
+    cbar = plt.colorbar(cmap, label="variant frequency", pad=0, shrink=n_samples/(min_y_location+n_samples), anchor=(0.1, 1), aspect=15)
     cbar.set_ticks(ticks)
     cbar.set_ticklabels(labels)
 
@@ -178,4 +177,4 @@ def create_gene_vis(ax, genes_with_mutations, n_mutations, y_size, n_tracks, gen
         if stop-start[0] > n_mutations/(y_size*8)*len(gene):
             gene_annotations.append(ax.text(start[0]+(stop-start[0])/2, start[1]+height/2, gene, ha="center", va="center"))
         else:
-            gene_annotations.append(ax.text(start[0]+(stop-start[0])/2, start[1], gene, rotation=40, rotation_mode="anchor", ha="right", va="top"))
+            gene_annotations.append(ax.text(start[0]+(stop-start[0])/2, start[1]-height/4, gene, rotation=40, rotation_mode="anchor", ha="right", va="bottom"))

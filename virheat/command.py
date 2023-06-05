@@ -1,10 +1,10 @@
 """
 contains the main workflow of virHEAT
 """
-
 # BUILT-INS
 import os
 import sys
+import math
 import argparse
 
 # LIB
@@ -106,7 +106,7 @@ def main(sysargs=sys.argv[1:]):
     if n_samples <= 8:
         genome_y_location = 2
     else:
-        genome_y_location = n_samples / 4
+        genome_y_location = math.log2(n_samples)
 
     # gff3 data extraction
     if args.gff3_path is not None and args.genome_length is not None:
