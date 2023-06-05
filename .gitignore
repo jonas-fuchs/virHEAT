@@ -4,3 +4,4 @@ virheat/scripts/__pycache__/**
 virheat/__pycache__/**
 virheat.egg-info/**
 build/**
+venv/**
