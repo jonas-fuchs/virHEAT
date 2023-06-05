@@ -116,8 +116,11 @@ def create_axis(ax, n_mutations, min_y_location, n_samples, file_names, genome_e
     ax.set_xlim(0, n_mutations)
     ax.set_ylim(-min_y_location, n_samples)
     # define new ticks depending on the genome size
-    xtick_dis = round(genome_end/6, -int(math.log10(genome_end/6))+1)
-    xtick_labels = [0, xtick_dis, xtick_dis*2, xtick_dis*3, xtick_dis*4, xtick_dis*5, genome_end]
+    if n_mutations >= 15:
+        xtick_dis = round(genome_end/6, -int(math.log10(genome_end/6))+1)
+        xtick_labels = [0, xtick_dis, xtick_dis*2, xtick_dis*3, xtick_dis*4, xtick_dis*5, genome_end]
+    else:
+        xtick_labels = [0, genome_end]
     xtick_labels = [int(tick) for tick in xtick_labels]
     # get the correct location of the genome pos on the axis
     xticks = [n_mutations/genome_end*tick for tick in xtick_labels]
