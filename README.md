@@ -3,6 +3,7 @@
 [![language](https://img.shields.io/badge/python-%3E3.9-green)](https://www.python.org/)
 [![License: GPL v3](https://img.shields.io/github/license/jonas-fuchs/virheat)](https://www.gnu.org/licenses/gpl-3.0)
 [![pypi version](https://img.shields.io/pypi/v/virheat)](https://pypi.org/project/virheat/)
+[![pypi version](https://static.pepy.tech/badge/virheat)](https://pypi.org/project/virheat/)
 
 ![Logo](./virheat.png)
 
