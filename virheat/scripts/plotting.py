@@ -41,7 +41,6 @@ def create_genome_vis(ax, genome_y_location, n_mutations, unique_mutations, geno
     y_max = -genome_y_location+genome_y_location/2
 
     # create blank rectangle for genome vis
-    # ax.add_patch(patches.Rectangle((0,y_min),n_mutations,y_max - y_min, alpha=1, edgecolor=None, facecolor="lightgrey"))
     ax.add_patch(
         patches.FancyBboxPatch(
                             (0, y_min), n_mutations, y_max - y_min,
@@ -67,7 +66,7 @@ def create_genome_vis(ax, genome_y_location, n_mutations, unique_mutations, geno
     return mutation_set
 
 
-def create_colorbar(threshold, cmap, min_y_location, n_samples):
+def create_colorbar(threshold, cmap, min_y_location, n_samples, n_mutations):
     """
     creates a custom colorbar and annotates the threshold
     """
@@ -92,7 +91,7 @@ def create_colorbar(threshold, cmap, min_y_location, n_samples):
     ticks.append(threshold)
     labels.append(f"threshold\n={threshold}")
 
-    cbar = plt.colorbar(cmap, label="variant frequency", pad=0, shrink=n_samples/(min_y_location+n_samples), anchor=(0.1, 1))
+    cbar = plt.colorbar(cmap, label="variant frequency", pad=0, shrink=n_samples/(min_y_location+n_samples), anchor=(0.1, 1), aspect=n_mutations/2)
     cbar.set_ticks(ticks)
     cbar.set_ticklabels(labels)
 
@@ -165,7 +164,7 @@ def create_gene_vis(ax, genes_with_mutations, n_mutations, y_size, n_tracks, gen
     mult_factor = n_mutations/genome_end
 
     for idx, gene in enumerate(genes_with_mutations):
-        start = (mult_factor*genes_with_mutations[gene][0][0], -min_y_location+(n_tracks-genes_with_mutations[gene][1])*genome_y_location/4-genome_y_location/4)
+        start = (mult_factor*genes_with_mutations[gene][0][0], -min_y_location+(n_tracks-genes_with_mutations[gene][1])*genome_y_location/2-genome_y_location/2)
         stop = mult_factor*genes_with_mutations[gene][0][1]
         height = genome_y_location/2
         ax.add_patch(
