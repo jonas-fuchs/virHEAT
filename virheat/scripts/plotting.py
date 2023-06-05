@@ -41,7 +41,6 @@ def create_genome_vis(ax, genome_y_location, n_mutations, unique_mutations, geno
     y_max = -genome_y_location+genome_y_location/2
 
     # create blank rectangle for genome vis
-    # ax.add_patch(patches.Rectangle((0,y_min),n_mutations,y_max - y_min, alpha=1, edgecolor=None, facecolor="lightgrey"))
     ax.add_patch(
         patches.FancyBboxPatch(
                             (0, y_min), n_mutations, y_max - y_min,
@@ -67,25 +66,31 @@ def create_genome_vis(ax, genome_y_location, n_mutations, unique_mutations, geno
     return mutation_set
 
 
-def create_colorbar(threshold, cmap, min_y_location, n_samples):
+def create_colorbar(threshold, cmap, min_y_location, n_samples, n_mutations):
     """
     creates a custom colorbar and annotates the threshold
     """
-    ticks = [0, 0.2, 0.4, 0.6, 0.8, 1]
-    labels = [0, 0.2, 0.4, 0.6, 0.8, 1]
-
-    if threshold+0.1 in ticks or threshold-0.1 in ticks:
-        rounded_threshold = threshold
+    if n_samples >= 8:
+        ticks = [0, 0.2, 0.4, 0.6, 0.8, 1]
+        labels = [0, 0.2, 0.4, 0.6, 0.8, 1]
+        if threshold + 0.1 in ticks or threshold - 0.1 in ticks:
+            rounded_threshold = threshold
+        else:
+            rounded_threshold = round(threshold * 5) / 5
     else:
-        rounded_threshold = round(threshold*5)/5
+        ticks = [0, 0.5, 1]
+        labels = [0, 0.5, 1]
+        if threshold + 0.25 in ticks or threshold - 0.25 in ticks:
+            rounded_threshold = threshold
+        else:
+            rounded_threshold = round(threshold * 2) / 2
 
     if rounded_threshold in ticks:
         ticks.remove(rounded_threshold)
         labels.remove(rounded_threshold)
     ticks.append(threshold)
     labels.append(f"threshold\n={threshold}")
-
-    cbar = plt.colorbar(cmap, label="variant frequency", pad=0, shrink=n_samples/(min_y_location+n_samples), anchor=(0.1, 1))
+    cbar = plt.colorbar(cmap, label="variant frequency", pad=0, shrink=n_samples/(min_y_location+n_samples), anchor=(0.1, 1), aspect=15)
     cbar.set_ticks(ticks)
     cbar.set_ticklabels(labels)
 
@@ -115,8 +120,14 @@ def create_axis(ax, n_mutations, min_y_location, n_samples, file_names, genome_e
     ax.set_xlim(0, n_mutations)
     ax.set_ylim(-min_y_location, n_samples)
     # define new ticks depending on the genome size
-    xtick_dis = round(genome_end/6, -int(math.log10(genome_end/6))+1)
-    xtick_labels = [0, xtick_dis, xtick_dis*2, xtick_dis*3, xtick_dis*4, xtick_dis*5, genome_end]
+    if n_mutations >= 20:
+        xtick_dis = round(genome_end/6, -int(math.log10(genome_end / 6)) + 1)
+        xtick_labels = [0, xtick_dis, xtick_dis*2, xtick_dis*3, xtick_dis*4, xtick_dis*5, genome_end]
+    elif n_mutations >= 10:
+        xtick_dis = round(genome_end / 3, -int(math.log10(genome_end / 3)) + 1)
+        xtick_labels = [0, xtick_dis, xtick_dis * 2, genome_end]
+    else:
+        xtick_labels = [0, genome_end]
     xtick_labels = [int(tick) for tick in xtick_labels]
     # get the correct location of the genome pos on the axis
     xticks = [n_mutations/genome_end*tick for tick in xtick_labels]
@@ -152,7 +163,7 @@ def create_gene_vis(ax, genes_with_mutations, n_mutations, y_size, n_tracks, gen
     mult_factor = n_mutations/genome_end
 
     for idx, gene in enumerate(genes_with_mutations):
-        start = (mult_factor*genes_with_mutations[gene][0][0], -min_y_location+(n_tracks-genes_with_mutations[gene][1])*genome_y_location/4-genome_y_location/4)
+        start = (mult_factor*genes_with_mutations[gene][0][0], -min_y_location+(n_tracks-genes_with_mutations[gene][1])*genome_y_location/2-genome_y_location/2)
         stop = mult_factor*genes_with_mutations[gene][0][1]
         height = genome_y_location/2
         ax.add_patch(
@@ -166,4 +177,4 @@ def create_gene_vis(ax, genes_with_mutations, n_mutations, y_size, n_tracks, gen
         if stop-start[0] > n_mutations/(y_size*8)*len(gene):
             gene_annotations.append(ax.text(start[0]+(stop-start[0])/2, start[1]+height/2, gene, ha="center", va="center"))
         else:
-            gene_annotations.append(ax.text(start[0]+(stop-start[0])/2, start[1]-height/4, gene, ha="center", va="center"))
+            gene_annotations.append(ax.text(start[0]+(stop-start[0])/2, start[1]-height/4, gene, rotation=40, rotation_mode="anchor", ha="right", va="bottom"))
