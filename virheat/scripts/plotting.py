@@ -74,11 +74,17 @@ def create_colorbar(threshold, cmap, min_y_location, n_samples):
     if n_samples >= 8:
         ticks = [0, 0.2, 0.4, 0.6, 0.8, 1]
         labels = [0, 0.2, 0.4, 0.6, 0.8, 1]
-        rounded_threshold = round(threshold * 5) / 5
+        if threshold + 0.1 in ticks or threshold - 0.1 in ticks:
+            rounded_threshold = threshold
+        else:
+            rounded_threshold = round(threshold * 5) / 5
     else:
         ticks = [0, 0.5, 1]
         labels = [0, 0.5, 1]
-        rounded_threshold = round(threshold * 2) / 2
+        if threshold + 0.25 in ticks or threshold - 0.25 in ticks:
+            rounded_threshold = threshold
+        else:
+            rounded_threshold = round(threshold * 2) / 2
 
     if rounded_threshold in ticks:
         ticks.remove(rounded_threshold)
