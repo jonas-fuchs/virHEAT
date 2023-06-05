@@ -103,7 +103,10 @@ def main(sysargs=sys.argv[1:]):
     # define relative locations of all items in the plot
     n_samples = len(frequency_array)
     n_mutations = len(frequency_array[0])
-    genome_y_location = n_samples/4
+    if n_samples <= 8:
+        genome_y_location = 2
+    else:
+        genome_y_location = n_samples / 4
 
     # gff3 data extraction
     if args.gff3_path is not None and args.genome_length is not None:
@@ -116,7 +119,7 @@ def main(sysargs=sys.argv[1:]):
         genome_end = data_prep.get_genome_end(gff3_info)
         genes_with_mutations, n_tracks = data_prep.create_track_dict(unique_mutations, gff3_info)
         # define space for the genome vis tracks
-        min_y_location = genome_y_location + genome_y_location/4 * (n_tracks+2)
+        min_y_location = genome_y_location + genome_y_location/2 * (n_tracks+1)
     elif args.genome_length is not None:
         genome_end = args.genome_length
         min_y_location = genome_y_location
