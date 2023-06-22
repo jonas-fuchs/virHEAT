@@ -6,6 +6,7 @@ contains all data prep functions of virHEAT
 import os
 import re
 import pathlib
+import sys
 
 # LIBS
 import numpy as np
@@ -91,7 +92,7 @@ def read_vcf(vcf_file):
                 key, val = info.split("=")
                 vcf_dict[key].append(convert_string(val))
                 visited_keys.append(key)
-        # append none for ech none vistited key
+        # append none for ech none visited key
         for key in [k for k in vcf_dict.keys() if k not in visited_keys]:
             vcf_dict[key].append(None)
 
@@ -199,7 +200,6 @@ def parse_gff3(file):
             # add start, stop and strand
             gff3_dict[gff_values[2]][attribute_id]["start"] = int(gff_values[3])
             gff3_dict[gff_values[2]][attribute_id]["stop"] = int(gff_values[4])
-            gff3_dict[gff_values[2]][attribute_id]["strand"] = gff_values[6]
 
     gff3_file.close()
 
@@ -233,13 +233,19 @@ def create_track_dict(unique_mutations, gff3_info):
     for mutation in unique_mutations:
         # get the mutation from string
         mutation = int(mutation.split("_")[0])
-        for gene_name in gff3_info["gene"]:
-            if mutation in range(gff3_info["gene"][gene_name]["start"], gff3_info["gene"][gene_name]["stop"]):
+        if "gene" in gff3_info.keys():
+            annotation_type = "gene"
+        elif "CDS" in gff3_info.keys():
+            annotation_type = "CDS"
+        else:
+            sys.exit("\033[31m\033[1mERROR:\033[0m Neither gene nor CDS in gff3!")
+
+        for annotation in gff3_info[annotation_type]:
+            if mutation in range(gff3_info[annotation_type][annotation]["start"], gff3_info[annotation_type][annotation]["stop"]):
                 genes_with_mutations.add(
-                    (gff3_info["gene"][gene_name]["gene"],
-                     gff3_info["gene"][gene_name]["start"],
-                     gff3_info["gene"][gene_name]["stop"],
-                     gff3_info["gene"][gene_name]["strand"])
+                    (gff3_info[annotation_type][annotation]["Name"],
+                     gff3_info[annotation_type][annotation]["start"],
+                     gff3_info[annotation_type][annotation]["stop"])
                 )
 
     # create a dict and sort
