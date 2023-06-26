@@ -6,6 +6,7 @@ contains all data prep functions of virHEAT
 import os
 import re
 import pathlib
+import sys
 
 # LIBS
 import numpy as np
@@ -91,7 +92,7 @@ def read_vcf(vcf_file):
                 key, val = info.split("=")
                 vcf_dict[key].append(convert_string(val))
                 visited_keys.append(key)
-        # append none for ech none vistited key
+        # append none for ech none visited key
         for key in [k for k in vcf_dict.keys() if k not in visited_keys]:
             vcf_dict[key].append(None)
 
@@ -199,7 +200,6 @@ def parse_gff3(file):
             # add start, stop and strand
             gff3_dict[gff_values[2]][attribute_id]["start"] = int(gff_values[3])
             gff3_dict[gff_values[2]][attribute_id]["stop"] = int(gff_values[4])
-            gff3_dict[gff_values[2]][attribute_id]["strand"] = gff_values[6]
 
     gff3_file.close()
 
@@ -221,7 +221,7 @@ def get_genome_end(gff3_dict):
     return genome_end
 
 
-def create_track_dict(unique_mutations, gff3_info):
+def create_track_dict(unique_mutations, gff3_info, annotation_type):
     """
     create a dictionary of the genes that have mutations and assess in which
     track these genes should go in case they overlap
@@ -233,14 +233,22 @@ def create_track_dict(unique_mutations, gff3_info):
     for mutation in unique_mutations:
         # get the mutation from string
         mutation = int(mutation.split("_")[0])
-        for gene_name in gff3_info["gene"]:
-            if mutation in range(gff3_info["gene"][gene_name]["start"], gff3_info["gene"][gene_name]["stop"]):
-                genes_with_mutations.add(
-                    (gff3_info["gene"][gene_name]["gene"],
-                     gff3_info["gene"][gene_name]["start"],
-                     gff3_info["gene"][gene_name]["stop"],
-                     gff3_info["gene"][gene_name]["strand"])
-                )
+        for type in annotation_type:
+            if type not in gff3_info.keys():
+                continue
+            for annotation in gff3_info[type]:
+                if mutation in range(gff3_info[type][annotation]["start"], gff3_info[type][annotation]["stop"]):
+                    if "Name" in gff3_info[type][annotation].keys():
+                        attribute_name = gff3_info[type][annotation]["Name"]
+                    else:
+                        attribute_name = annotation
+                    genes_with_mutations.add(
+                        (attribute_name,
+                         gff3_info[type][annotation]["start"],
+                         gff3_info[type][annotation]["stop"])
+                    )
+    if not genes_with_mutations:
+        sys.exit("none of the given annotation types were found in gff3.")
 
     # create a dict and sort
     gene_dict = {element[0]: [element[1:4]] for element in genes_with_mutations}

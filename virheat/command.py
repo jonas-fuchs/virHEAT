@@ -49,6 +49,14 @@ def get_args(sysargs):
         help="path to gff3 (needed if length is not provided)"
     )
     parser.add_argument(
+        "-a",
+        "--gff3-annotations",
+        type=str,
+        metavar="gene",
+        default="gene",
+        help="annotations to display from gff3 file (standard: gene). Multiple possible (comma seperated)"
+    )
+    parser.add_argument(
         "-t",
         "--threshold",
         type=float,
@@ -117,7 +125,8 @@ def main(sysargs=sys.argv[1:]):
         if gff3_ref_name not in reference_name and reference_name not in gff3_ref_name:
             print("\033[31m\033[WARNING:\033[0m gff3 reference does not match the vcf reference!")
         genome_end = data_prep.get_genome_end(gff3_info)
-        genes_with_mutations, n_tracks = data_prep.create_track_dict(unique_mutations, gff3_info)
+        annotation_list = args.gff3_annotations.split(",")
+        genes_with_mutations, n_tracks = data_prep.create_track_dict(unique_mutations, gff3_info, annotation_list)
         # define space for the genome vis tracks
         min_y_location = genome_y_location + genome_y_location/2 * (n_tracks+1)
     elif args.genome_length is not None:
@@ -127,7 +136,7 @@ def main(sysargs=sys.argv[1:]):
         sys.exit("\033[31m\033[1mERROR:\033[0m Provide either a gff3 file (-g) or the length (-l) of the genome which you used for mapping")
 
     # define size of the plot
-    y_size = (n_mutations)*0.4
+    y_size = n_mutations*0.4
     x_size = y_size*(n_samples+min_y_location)/n_mutations
     x_size = x_size-x_size*0.15  # compensate of heatmap annotation
 
@@ -145,7 +154,7 @@ def main(sysargs=sys.argv[1:]):
         # plot gene track
         plotting.create_gene_vis(ax, genes_with_mutations, n_mutations, y_size, n_tracks, genome_end, min_y_location, genome_y_location, colors_genes)
     plotting.create_axis(ax, n_mutations, min_y_location, n_samples, file_names, genome_end, genome_y_location, unique_mutations, reference_name)
-    plotting.create_colorbar(args.threshold, cmap_cells, min_y_location, n_samples, n_mutations)
+    plotting.create_colorbar(args.threshold, cmap_cells, min_y_location, n_samples)
     plotting.create_mutation_legend(mutation_set, min_y_location, n_samples)
 
     # create output folder

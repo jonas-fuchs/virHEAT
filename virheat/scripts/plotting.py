@@ -66,7 +66,7 @@ def create_genome_vis(ax, genome_y_location, n_mutations, unique_mutations, geno
     return mutation_set
 
 
-def create_colorbar(threshold, cmap, min_y_location, n_samples, n_mutations):
+def create_colorbar(threshold, cmap, min_y_location, n_samples):
     """
     creates a custom colorbar and annotates the threshold
     """
