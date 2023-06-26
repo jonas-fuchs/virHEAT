@@ -64,6 +64,8 @@ optional arguments:
                         length of the genome (needed if gff3 is not provided)
   -g None, --gff3-path None
                         path to gff3 (needed if length is not provided)
+  -a gene, --gff3-annotations gene
+                        annotations to display from gff3 file (standard: gene)
   -t 0, --threshold 0   display frequencies above this threshold
   --delete, --no-delete
                         delete mutations with frequencies present in all

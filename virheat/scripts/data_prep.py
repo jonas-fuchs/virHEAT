@@ -221,7 +221,7 @@ def get_genome_end(gff3_dict):
     return genome_end
 
 
-def create_track_dict(unique_mutations, gff3_info):
+def create_track_dict(unique_mutations, gff3_info, annotation_type):
     """
     create a dictionary of the genes that have mutations and assess in which
     track these genes should go in case they overlap
@@ -233,20 +233,22 @@ def create_track_dict(unique_mutations, gff3_info):
     for mutation in unique_mutations:
         # get the mutation from string
         mutation = int(mutation.split("_")[0])
-        if "gene" in gff3_info.keys():
-            annotation_type = "gene"
-        elif "CDS" in gff3_info.keys():
-            annotation_type = "CDS"
-        else:
-            sys.exit("\033[31m\033[1mERROR:\033[0m Neither gene nor CDS in gff3!")
-
-        for annotation in gff3_info[annotation_type]:
-            if mutation in range(gff3_info[annotation_type][annotation]["start"], gff3_info[annotation_type][annotation]["stop"]):
-                genes_with_mutations.add(
-                    (gff3_info[annotation_type][annotation]["Name"],
-                     gff3_info[annotation_type][annotation]["start"],
-                     gff3_info[annotation_type][annotation]["stop"])
-                )
+        for type in annotation_type:
+            if type not in gff3_info.keys():
+                continue
+            for annotation in gff3_info[type]:
+                if mutation in range(gff3_info[type][annotation]["start"], gff3_info[type][annotation]["stop"]):
+                    if "Name" in gff3_info[type][annotation].keys():
+                        attribute_name = gff3_info[type][annotation]["Name"]
+                    else:
+                        attribute_name = annotation
+                    genes_with_mutations.add(
+                        (attribute_name,
+                         gff3_info[type][annotation]["start"],
+                         gff3_info[type][annotation]["stop"])
+                    )
+    if not genes_with_mutations:
+        sys.exit("none of the given annotation types were found in gff3.")
 
     # create a dict and sort
     gene_dict = {element[0]: [element[1:4]] for element in genes_with_mutations}
