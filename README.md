@@ -27,7 +27,7 @@ pip install virheat
 ```
 ### from this repo:
 ```shell
-git clone https://github.com/jonas-fuchs/varVAMP
+git clone https://github.com/jonas-fuchs/virHEAT
 cd virHEAT
 ```
 and then install virHEAT with:
