@@ -56,7 +56,7 @@ usage: 	virheat <folder containing vcfs> <output dir> -l or -g [additional argum
 
 ```
 positional arguments:
-  input                 folder containing vcf files and output folder
+  input                 folder containing vcf (and tsv) files and output folder
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -71,10 +71,13 @@ optional arguments:
                         delete mutations with frequencies present in all
                         samples (default: True)
   --sort, --no-sort     sort alphanumerically (default: False)
+  --min-cov 20          display mutations covered at least x time (only if per base cov tsv files are provided)
   -v, --version         show program's version number and exit
 ```
 
 You need to either provide the length of your reference genome or if you want to get the sequence annotation you will need to provide the gff3 file.
+
+Additionally, you can also analyse if mutations are sufficiently covered and display non-covered cells in grey. For that first create a per base coverage tsv files for each bam file with [Qualimap](http://qualimap.conesalab.org/) and provide it in the same folder as the vcf files. Give them the same name as your vcf files.
 
 ---
 
