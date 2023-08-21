@@ -26,11 +26,11 @@ def get_args(sysargs):
     """
     parser = argparse.ArgumentParser(
         prog=_program,
-        usage='''\tvirheat <folder containing vcfs> <output dir> -l or -g [additional arguments]''')
+        usage='''\tvirheat <folder containing input files (vcf/tsv)> <output dir> -l or -g [additional arguments]''')
     parser.add_argument(
         "input",
         nargs=2,
-        help="folder containing vcf files and output folder"
+        help="folder containing input files and output folder"
     )
     parser.add_argument(
         "-l",
@@ -77,6 +77,13 @@ def get_args(sysargs):
         help="sort alphanumerically"
     )
     parser.add_argument(
+        "--min-cov",
+        type=int,
+        metavar="20",
+        default=20,
+        help="display mutations covered at least x time (only if per base cov tsv files are provided)"
+    )
+    parser.add_argument(
         "-v",
         "--version",
         action='version',
@@ -98,7 +105,7 @@ def main(sysargs=sys.argv[1:]):
     args = get_args(sysargs)
 
     # get vcf files and sort
-    vcf_files = data_prep.get_vcf_files(args.input[0])
+    vcf_files = data_prep.get_files(args.input[0], "vcf")
     if args.sort:
         vcf_files = sorted(vcf_files, key=lambda x: data_prep.get_digit_and_alpha(os.path.basename(x)))
 
@@ -107,6 +114,8 @@ def main(sysargs=sys.argv[1:]):
     frequency_array = data_prep.create_freq_array(unique_mutations, frequency_lists)
     if args.delete:
         frequency_array = data_prep.delete_common_mutations(frequency_array, unique_mutations)
+    # annotate low coverage if per base coveage from qualimap was provided
+    data_prep.annotate_non_covered_regions(args.input[0], args.min_cov, frequency_array, file_names, unique_mutations)
 
     # define relative locations of all items in the plot
     n_samples = len(frequency_array)
@@ -123,7 +132,7 @@ def main(sysargs=sys.argv[1:]):
         gff3_info, gff3_ref_name = data_prep.parse_gff3(args.gff3_path)
         # issue a warning if #CHROM and gff3 do not match
         if gff3_ref_name not in reference_name and reference_name not in gff3_ref_name:
-            print("\033[31m\033[WARNING:\033[0m gff3 reference does not match the vcf reference!")
+            print("\033[31m\033[1mWARNING:\033[0m gff3 reference does not match the vcf reference!")
         genome_end = data_prep.get_genome_end(gff3_info)
         annotation_list = args.gff3_annotations.split(",")
         genes_with_mutations, n_tracks = data_prep.create_track_dict(unique_mutations, gff3_info, annotation_list)
@@ -144,7 +153,9 @@ def main(sysargs=sys.argv[1:]):
     fig, ax = plt.subplots(figsize=[y_size, x_size])
 
     # plot all elements
-    cmap_cells = cm.ScalarMappable(norm=colors.Normalize(0, 1), cmap=colormaps["gist_heat_r"])
+    cmap = cm.gist_heat_r
+    cmap.set_bad('silver', 1.)
+    cmap_cells = cm.ScalarMappable(norm=colors.Normalize(0, 1), cmap=cmap)
     plotting.create_heatmap(ax, frequency_array, cmap_cells)
     mutation_set = plotting.create_genome_vis(ax, genome_y_location, n_mutations, unique_mutations, genome_end)
     if args.gff3_path is not None:

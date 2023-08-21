@@ -10,13 +10,14 @@ import sys
 
 # LIBS
 import numpy as np
+import pandas as pd
 
 
-def get_vcf_files(path):
+def get_files(path, type):
     """
     returns a list of vcf files in a paticular folder
     """
-    return list(pathlib.Path(path).glob('*.vcf'))
+    return list(pathlib.Path(path).glob(f'*.{type}'))
 
 
 def get_digit_and_alpha(filename):
@@ -60,7 +61,7 @@ def read_vcf(vcf_file):
         lines = [l.split("\t") for l in f if not l.startswith('#')]
     # check if vcf is empty
     if not lines:
-        print(f"WARNING: {vcf_file} is empty!")
+        print(f"\033[31m\033[1mWARNING:\033[0m {vcf_file} is empty!")
     # get standard headers as keys
     for key in header[0:6]:
         vcf_dict[key] = []
@@ -145,6 +146,29 @@ def create_freq_array(unique_mutations, frequency_lists):
         frequency_array.append(frequencies)
 
     return np.array(frequency_array)
+
+
+def annotate_non_covered_regions(coverage_dir, min_coverage, frequency_array, file_names, unique_mutations):
+    """
+    Insert nan values into np array if position is not covered. Needs
+    per base coverage tsv files created by bamqc
+    """
+
+    # get tsv files
+    per_base_coverage_files = get_files(coverage_dir, "tsv")
+    if per_base_coverage_files:
+        for i, (file_name, array) in enumerate(zip(file_names, frequency_array)):
+            if file_name not in [os.path.splitext(os.path.basename(file))[0] for file in per_base_coverage_files]:
+                print(f"\033[31m\033[1mWARNING:\033[0m {file_name} was not found in tsv files.")
+                continue
+            tsv_file = [file for file in per_base_coverage_files if os.path.splitext(os.path.basename(file))[0] == file_name][0]
+            coverage = pd.read_csv(tsv_file, sep="\t")
+            for j, (mutation, frequency) in enumerate(zip(unique_mutations, array)):
+                mut_pos = int(mutation.split("_")[0])
+                if all([frequency == 0, coverage[coverage["pos"] == mut_pos]["coverage"].iloc[0] <= min_coverage]):
+                    frequency_array[i][j] = np.NAN
+
+    return np.ma.array(frequency_array, mask=np.isnan(frequency_array))
 
 
 def delete_common_mutations(frequency_array, unique_mutations):
