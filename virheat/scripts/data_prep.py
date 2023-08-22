@@ -165,7 +165,7 @@ def annotate_non_covered_regions(coverage_dir, min_coverage, frequency_array, fi
             coverage = pd.read_csv(tsv_file, sep="\t")
             for j, (mutation, frequency) in enumerate(zip(unique_mutations, array)):
                 mut_pos = int(mutation.split("_")[0])
-                if all([frequency == 0, coverage[coverage["pos"] == mut_pos]["coverage"].iloc[0] <= min_coverage]):
+                if coverage[coverage["pos"] == mut_pos].empty or all([frequency == 0, coverage[coverage["pos"] == mut_pos]["coverage"].iloc[0] <= min_coverage]):
                     frequency_array[i][j] = np.NAN
 
     return np.ma.array(frequency_array, mask=np.isnan(frequency_array))
