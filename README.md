@@ -79,6 +79,8 @@ You need to either provide the length of your reference genome or if you want to
 
 Additionally, you can also analyse if mutations are sufficiently covered and display non-covered cells in grey. For that first create a per base coverage tsv files for each bam file with [Qualimap](http://qualimap.conesalab.org/) and provide it in the same folder as the vcf files. Give them the same name as your vcf files.
 
+<a href="https://www.buymeacoffee.com/jofox" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: 41px !important;width: 174px !important;box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;" ></a>
+
 ---
 
 **Important disclaimer:**
