@@ -15,10 +15,11 @@ setup(
     license_files=('LICENSE'),
     packages=find_packages(),
     install_requires=[
-        "matplotlib>=3.5.1",
+        "matplotlib>=3.5.1,<=3.8.0",
         "numpy>=1.23.3",
+        "pandas>=1.4.4"
     ],
-    description='virHEAT creates a heatmap from vcf files and maps positions onto a reference genome.',
+    description='virHEAT creates a heatmap from vcf files and maps positions on to a reference genome.',
     url='https://github.com/jonas-fuchs/virHEAT',
     author='Dr. Jonas Fuchs',
     author_email='jonas.fuchs@uniklinik-freiburg.de',
