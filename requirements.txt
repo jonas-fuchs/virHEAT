@@ -1,4 +1,1 @@
-matplotlib>=3.5.1
-numpy>=1.23.3
-vcfpy>=0.13.6
-pandas>=1.4.4
+.

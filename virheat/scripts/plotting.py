@@ -66,7 +66,7 @@ def create_genome_vis(ax, genome_y_location, n_mutations, unique_mutations, geno
     return mutation_set
 
 
-def create_colorbar(threshold, cmap, min_y_location, n_samples):
+def create_colorbar(threshold, cmap, min_y_location, n_samples, ax):
     """
     creates a custom colorbar and annotates the threshold
     """
@@ -90,7 +90,7 @@ def create_colorbar(threshold, cmap, min_y_location, n_samples):
         labels.remove(rounded_threshold)
     ticks.append(threshold)
     labels.append(f"threshold\n={threshold}")
-    cbar = plt.colorbar(cmap, label="variant frequency", pad=0, shrink=n_samples/(min_y_location+n_samples), anchor=(0.1, 1), aspect=15)
+    cbar = plt.colorbar(cmap, label="variant frequency", pad=0, shrink=n_samples/(min_y_location+n_samples), anchor=(0.1,1), aspect=15, ax=ax)
     cbar.set_ticks(ticks)
     cbar.set_ticklabels(labels)
 
