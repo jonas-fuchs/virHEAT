@@ -1,4 +1,3 @@
-[![CodeFactor](https://www.codefactor.io/repository/github/jonas-fuchs/virheat/badge)](https://www.codefactor.io/repository/github/jonas-fuchs/virheat)
 [![DOI](https://zenodo.org/badge/639918477.svg)](https://zenodo.org/badge/latestdoi/639918477)
 [![language](https://img.shields.io/badge/python-%3E3.9-green)](https://www.python.org/)
 [![License: GPL v3](https://img.shields.io/github/license/jonas-fuchs/virheat)](https://www.gnu.org/licenses/gpl-3.0)
