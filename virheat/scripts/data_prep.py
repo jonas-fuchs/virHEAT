@@ -269,7 +269,7 @@ def create_track_dict(unique_mutations, gff3_info, annotation_type):
                          gff3_info[type][annotation]["stop"])
                     )
     if not genes_with_mutations:
-        print("\033[31m\033[1mWARNING:\033[0m either the annotation types were not found in gff3 or no genes with mutations.")
+        print("\033[31m\033[1mWARNING:\033[0m either the annotation types were not found in gff3 or the mutations are not within genes.")
         return {}, 0
 
     # create a dict and sort
