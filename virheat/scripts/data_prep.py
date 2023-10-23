@@ -66,7 +66,7 @@ def read_vcf(vcf_file):
     for key in header[0:6]:
         vcf_dict[key] = []
     # functional effect
-    vcf_dict["MUT_TYPE"] = []
+    vcf_dict["MUT_TYPE_"] = []
     # info field
     for line in lines:
         for info in line[7].split(";"):
