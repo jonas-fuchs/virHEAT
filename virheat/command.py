@@ -120,6 +120,8 @@ def main(sysargs=sys.argv[1:]):
     # define relative locations of all items in the plot
     n_samples = len(frequency_array)
     n_mutations = len(frequency_array[0])
+    if n_mutations == 0:
+        sys.exit("\033[31m\033[1mERROR:\033[0m Frequency array seems to be empty. There is nothing to plot.")
     if n_samples < 4:
         genome_y_location = 2
     else:
@@ -159,11 +161,12 @@ def main(sysargs=sys.argv[1:]):
     plotting.create_heatmap(ax, frequency_array, cmap_cells)
     mutation_set = plotting.create_genome_vis(ax, genome_y_location, n_mutations, unique_mutations, genome_end)
     if args.gff3_path is not None:
-        # distinct colors for the genes
-        cmap_genes = plt.get_cmap('tab20', len(genes_with_mutations))
-        colors_genes = [cmap_genes(i) for i in range(len(genes_with_mutations))]
-        # plot gene track
-        plotting.create_gene_vis(ax, genes_with_mutations, n_mutations, y_size, n_tracks, genome_end, min_y_location, genome_y_location, colors_genes)
+        if genes_with_mutations:
+            # distinct colors for the genes
+            cmap_genes = plt.get_cmap('tab20', len(genes_with_mutations))
+            colors_genes = [cmap_genes(i) for i in range(len(genes_with_mutations))]
+            # plot gene track
+            plotting.create_gene_vis(ax, genes_with_mutations, n_mutations, y_size, n_tracks, genome_end, min_y_location, genome_y_location, colors_genes)
     plotting.create_axis(ax, n_mutations, min_y_location, n_samples, file_names, genome_end, genome_y_location, unique_mutations, reference_name)
     plotting.create_colorbar(args.threshold, cmap_cells, min_y_location, n_samples, ax)
     plotting.create_mutation_legend(mutation_set, min_y_location, n_samples)
