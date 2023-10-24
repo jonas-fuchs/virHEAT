@@ -182,7 +182,12 @@ def delete_common_mutations(frequency_array, unique_mutations):
         check_all = []
         for frequency_list in frequency_array:
             check_all.append(frequency_list[idx])
-        if all(x>0 for x in check_all) or all(x==0 for x in check_all):
+        # check if all mutation in a column are zero (happens with some weird callers)
+        if all(x == 0 for x in check_all):
+            mut_to_del.append(idx)
+        # check if frequencies are present in all columns and the maximal diff is greater than 0.2
+        # example [0.8, 0.7, 0.6] is not deleted whereas [0.8, 0.7, 0.7] is deleted
+        elif all(x > 0 for x in check_all) and max(check_all)-min(check_all) >= 0.2:
             mut_to_del.append(idx)
 
     for idx in sorted(mut_to_del, reverse=True):

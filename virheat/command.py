@@ -52,9 +52,11 @@ def get_args(sysargs):
         "-a",
         "--gff3-annotations",
         type=str,
+        action="store",
         metavar="gene",
-        default="gene",
-        help="annotations to display from gff3 file (standard: gene). Multiple possible (comma seperated)"
+        nargs="*",
+        default=["gene"],
+        help="annotations to display from gff3 file (standard: gene). Multiple possible."
     )
     parser.add_argument(
         "-t",
@@ -68,7 +70,7 @@ def get_args(sysargs):
         "--delete",
         action=argparse.BooleanOptionalAction,
         default=True,
-        help="delete mutations with frequencies present in all samples"
+        help="delete mutations that are present in all samples and their maximum frequency divergence is smaller than 0.2"
     )
     parser.add_argument(
         "--sort",
@@ -136,8 +138,7 @@ def main(sysargs=sys.argv[1:]):
         if gff3_ref_name not in reference_name and reference_name not in gff3_ref_name:
             print("\033[31m\033[1mWARNING:\033[0m gff3 reference does not match the vcf reference!")
         genome_end = data_prep.get_genome_end(gff3_info)
-        annotation_list = args.gff3_annotations.split(",")
-        genes_with_mutations, n_tracks = data_prep.create_track_dict(unique_mutations, gff3_info, annotation_list)
+        genes_with_mutations, n_tracks = data_prep.create_track_dict(unique_mutations, gff3_info, args.gff3_annotations)
         # define space for the genome vis tracks
         min_y_location = genome_y_location + genome_y_location/2 * (n_tracks+1)
     elif args.genome_length is not None:
