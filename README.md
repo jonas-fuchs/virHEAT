@@ -3,6 +3,8 @@
 [![License: GPL v3](https://img.shields.io/github/license/jonas-fuchs/virheat)](https://www.gnu.org/licenses/gpl-3.0)
 [![pypi version](https://img.shields.io/pypi/v/virheat)](https://pypi.org/project/virheat/)
 [![pypi version](https://static.pepy.tech/badge/virheat)](https://pypi.org/project/virheat/)
+[![CONDA](https://img.shields.io/conda/v/bioconda/virheat?label=conda%20version)](https://anaconda.org/bioconda/virheat)
+[![CONDA](https://img.shields.io/conda/dn/bioconda/virheat?label=conda%20downloads)](https://anaconda.org/bioconda/virheat)
 
 ![Logo](./virheat.png)
 
@@ -23,6 +25,10 @@ Ever wanted to have a condensed look at variant frequencies after mapping your r
 ### via pip (recommened):
 ```shell
 pip install virheat
+```
+### via conda:
+```shell
+conda install -c bioconda virheat
 ```
 ### from this repo:
 ```shell
