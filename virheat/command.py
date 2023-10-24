@@ -64,19 +64,19 @@ def get_args(sysargs):
         type=float,
         metavar="0",
         default=0,
-        help="display frequencies above this threshold"
+        help="display frequencies above this threshold (0-1)"
     )
     parser.add_argument(
         "--delete",
         action=argparse.BooleanOptionalAction,
         default=True,
-        help="delete mutations that are present in all samples and their maximum frequency divergence is smaller than 0.2"
+        help="delete mutations that are present in all samples and their maximum frequency divergence is smaller than 0.5"
     )
     parser.add_argument(
         "--sort",
         action=argparse.BooleanOptionalAction,
         default=False,
-        help="sort alphanumerically"
+        help="sort sample names alphanumerically"
     )
     parser.add_argument(
         "--min-cov",
