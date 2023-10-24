@@ -52,9 +52,11 @@ def get_args(sysargs):
         "-a",
         "--gff3-annotations",
         type=str,
+        action="store",
         metavar="gene",
-        default="gene",
-        help="annotations to display from gff3 file (standard: gene). Multiple possible (comma seperated)"
+        nargs="*",
+        default=["gene"],
+        help="annotations to display from gff3 file (standard: gene). Multiple possible."
     )
     parser.add_argument(
         "-t",
@@ -62,19 +64,19 @@ def get_args(sysargs):
         type=float,
         metavar="0",
         default=0,
-        help="display frequencies above this threshold"
+        help="display frequencies above this threshold (0-1)"
     )
     parser.add_argument(
         "--delete",
         action=argparse.BooleanOptionalAction,
         default=True,
-        help="delete mutations with frequencies present in all samples"
+        help="delete mutations that are present in all samples and their maximum frequency divergence is smaller than 0.5"
     )
     parser.add_argument(
         "--sort",
         action=argparse.BooleanOptionalAction,
         default=False,
-        help="sort alphanumerically"
+        help="sort sample names alphanumerically"
     )
     parser.add_argument(
         "--min-cov",
@@ -120,6 +122,8 @@ def main(sysargs=sys.argv[1:]):
     # define relative locations of all items in the plot
     n_samples = len(frequency_array)
     n_mutations = len(frequency_array[0])
+    if n_mutations == 0:
+        sys.exit("\033[31m\033[1mERROR:\033[0m Frequency array seems to be empty. There is nothing to plot.")
     if n_samples < 4:
         genome_y_location = 2
     else:
@@ -134,8 +138,7 @@ def main(sysargs=sys.argv[1:]):
         if gff3_ref_name not in reference_name and reference_name not in gff3_ref_name:
             print("\033[31m\033[1mWARNING:\033[0m gff3 reference does not match the vcf reference!")
         genome_end = data_prep.get_genome_end(gff3_info)
-        annotation_list = args.gff3_annotations.split(",")
-        genes_with_mutations, n_tracks = data_prep.create_track_dict(unique_mutations, gff3_info, annotation_list)
+        genes_with_mutations, n_tracks = data_prep.create_track_dict(unique_mutations, gff3_info, args.gff3_annotations)
         # define space for the genome vis tracks
         min_y_location = genome_y_location + genome_y_location/2 * (n_tracks+1)
     elif args.genome_length is not None:
@@ -159,11 +162,12 @@ def main(sysargs=sys.argv[1:]):
     plotting.create_heatmap(ax, frequency_array, cmap_cells)
     mutation_set = plotting.create_genome_vis(ax, genome_y_location, n_mutations, unique_mutations, genome_end)
     if args.gff3_path is not None:
-        # distinct colors for the genes
-        cmap_genes = plt.get_cmap('tab20', len(genes_with_mutations))
-        colors_genes = [cmap_genes(i) for i in range(len(genes_with_mutations))]
-        # plot gene track
-        plotting.create_gene_vis(ax, genes_with_mutations, n_mutations, y_size, n_tracks, genome_end, min_y_location, genome_y_location, colors_genes)
+        if genes_with_mutations:
+            # distinct colors for the genes
+            cmap_genes = plt.get_cmap('tab20', len(genes_with_mutations))
+            colors_genes = [cmap_genes(i) for i in range(len(genes_with_mutations))]
+            # plot gene track
+            plotting.create_gene_vis(ax, genes_with_mutations, n_mutations, y_size, n_tracks, genome_end, min_y_location, genome_y_location, colors_genes)
     plotting.create_axis(ax, n_mutations, min_y_location, n_samples, file_names, genome_end, genome_y_location, unique_mutations, reference_name)
     plotting.create_colorbar(args.threshold, cmap_cells, min_y_location, n_samples, ax)
     plotting.create_mutation_legend(mutation_set, min_y_location, n_samples)

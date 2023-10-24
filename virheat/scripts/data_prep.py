@@ -66,7 +66,7 @@ def read_vcf(vcf_file):
     for key in header[0:6]:
         vcf_dict[key] = []
     # functional effect
-    vcf_dict["TYPE"] = []
+    vcf_dict["MUT_TYPE_"] = []
     # info field
     for line in lines:
         for info in line[7].split(";"):
@@ -80,13 +80,13 @@ def read_vcf(vcf_file):
             vcf_dict[key].append(convert_string(line[idx]))
         # get mutation type
         if len(line[3]) == len(line[4]):
-            vcf_dict["TYPE"].append("SNV")
+            vcf_dict["MUT_TYPE_"].append("SNV")
         elif len(line[3]) < len(line[4]):
-            vcf_dict["TYPE"].append("INS")
+            vcf_dict["MUT_TYPE_"].append("INS")
         elif len(line[3]) > len(line[4]):
-            vcf_dict["TYPE"].append("DEL")
+            vcf_dict["MUT_TYPE_"].append("DEL")
         visited_keys.extend(header[0:6])
-        visited_keys.append("TYPE")
+        visited_keys.append("MUT_TYPE_")
         # get data from info field
         for info in line[7].split(";"):
             if "=" in info:
@@ -117,7 +117,7 @@ def extract_vcf_data(vcf_files, threshold=0):
             if not vcf_dict["AF"][idx] >= threshold:
                 continue
             frequency_list.append(
-                (f"{vcf_dict['POS'][idx]}_{vcf_dict['REF'][idx]}_{vcf_dict['ALT'][idx]}_{vcf_dict['TYPE'][idx]}", vcf_dict['AF'][idx])
+                (f"{vcf_dict['POS'][idx]}_{vcf_dict['REF'][idx]}_{vcf_dict['ALT'][idx]}_{vcf_dict['MUT_TYPE_'][idx]}", vcf_dict['AF'][idx])
             )
         frequency_lists.append(frequency_list)
     # sort by mutation index
@@ -179,13 +179,15 @@ def delete_common_mutations(frequency_array, unique_mutations):
     mut_to_del = []
 
     for idx in range(0, len(frequency_array[0])):
+        check_all = []
         for frequency_list in frequency_array:
-            if frequency_list[idx] != 0:
-                common_mut = True
-            else:
-                common_mut = False
-                break
-        if common_mut:
+            check_all.append(frequency_list[idx])
+        # check if all mutation in a column are zero (happens with some weird callers)
+        if all(x == 0 for x in check_all):
+            mut_to_del.append(idx)
+        # check if frequencies are present in all columns and the maximal diff is greater than 0.5
+        # example [0.8, 0.7, 0.3] is not deleted whereas [0.8, 0.7, 0.7] is deleted
+        elif all(x > 0 for x in check_all) and max(check_all)-min(check_all) < 0.5:
             mut_to_del.append(idx)
 
     for idx in sorted(mut_to_del, reverse=True):
@@ -272,7 +274,8 @@ def create_track_dict(unique_mutations, gff3_info, annotation_type):
                          gff3_info[type][annotation]["stop"])
                     )
     if not genes_with_mutations:
-        sys.exit("none of the given annotation types were found in gff3.")
+        print("\033[31m\033[1mWARNING:\033[0m either the annotation types were not found in gff3 or the mutations are not within genes.")
+        return {}, 0
 
     # create a dict and sort
     gene_dict = {element[0]: [element[1:4]] for element in genes_with_mutations}

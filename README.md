@@ -28,13 +28,8 @@ pip install virheat
 ```shell
 git clone https://github.com/jonas-fuchs/virHEAT
 cd virHEAT
-```
-and then install virHEAT with:
-```shell
 pip install -r requirements.txt
-```
-or:
-```shell
+# or
 pip install .
 ```
 That was already it. To check if it worked:
@@ -55,21 +50,20 @@ usage: 	virheat <folder containing vcfs> <output dir> -l or -g [additional argum
 
 ```
 positional arguments:
-  input                 folder containing vcf (and tsv) files and output folder
+  input                 folder containing input files and output folder
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
   -l None, --genome-length None
                         length of the genome (needed if gff3 is not provided)
   -g None, --gff3-path None
                         path to gff3 (needed if length is not provided)
-  -a gene, --gff3-annotations gene
-                        annotations to display from gff3 file (standard: gene)
-  -t 0, --threshold 0   display frequencies above this threshold
+  -a [gene ...], --gff3-annotations [gene ...]
+                        annotations to display from gff3 file (standard: gene). Multiple possible.
+  -t 0, --threshold 0   display frequencies above this threshold (0-1)
   --delete, --no-delete
-                        delete mutations with frequencies present in all
-                        samples (default: True)
-  --sort, --no-sort     sort alphanumerically (default: False)
+                        delete mutations that are present in all samples and their maximum frequency divergence is smaller than 0.5 (default: True)
+  --sort, --no-sort     sort sample names alphanumerically (default: False)
   --min-cov 20          display mutations covered at least x time (only if per base cov tsv files are provided)
   -v, --version         show program's version number and exit
 ```

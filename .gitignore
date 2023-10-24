@@ -5,3 +5,4 @@ virheat/__pycache__/**
 virheat.egg-info/**
 build/**
 venv/**
+test.py
