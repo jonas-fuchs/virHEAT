@@ -69,6 +69,8 @@ options:
   -t 0, --threshold 0   display frequencies above this threshold (0-1)
   --delete, --no-delete
                         delete mutations that are present in all samples and their maximum frequency divergence is smaller than 0.5 (default: True)
+  -n None, --delete-n None
+                        do not show mutations that occur n times or less (default: Do not delete)                      
   --sort, --no-sort     sort sample names alphanumerically (default: False)
   --min-cov 20          display mutations covered at least x time (only if per base cov tsv files are provided)
   -v, --version         show program's version number and exit

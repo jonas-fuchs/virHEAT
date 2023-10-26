@@ -73,6 +73,14 @@ def get_args(sysargs):
         help="delete mutations that are present in all samples and their maximum frequency divergence is smaller than 0.5"
     )
     parser.add_argument(
+        "-n",
+        "--delete-n",
+        type=int,
+        metavar='None',
+        default=None,
+        help="do not show mutations that occur n times or less (default: Do not delete)"
+    )
+    parser.add_argument(
         "--sort",
         action=argparse.BooleanOptionalAction,
         default=False,
@@ -114,8 +122,11 @@ def main(sysargs=sys.argv[1:]):
     # extract vcf info
     reference_name, frequency_lists, unique_mutations, file_names = data_prep.extract_vcf_data(vcf_files, threshold=args.threshold)
     frequency_array = data_prep.create_freq_array(unique_mutations, frequency_lists)
+    # user specified delete options (removes mutations based on various rationales)
     if args.delete:
         frequency_array = data_prep.delete_common_mutations(frequency_array, unique_mutations)
+    if args.delete_n is not None:
+        frequency_array = data_prep.delete_n_mutations(frequency_array, unique_mutations, args.delete_n)
     # annotate low coverage if per base coveage from qualimap was provided
     data_prep.annotate_non_covered_regions(args.input[0], args.min_cov, frequency_array, file_names, unique_mutations)
 
