@@ -78,7 +78,7 @@ def get_args(sysargs):
         type=int,
         metavar='None',
         default=None,
-        help="do not show mutations that occur n times or less"
+        help="do not show mutations that occur n times or less (default: Do not delete)"
     )
     parser.add_argument(
         "--sort",
