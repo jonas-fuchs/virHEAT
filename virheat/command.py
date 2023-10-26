@@ -116,6 +116,9 @@ def main(sysargs=sys.argv[1:]):
     frequency_array = data_prep.create_freq_array(unique_mutations, frequency_lists)
     if args.delete:
         frequency_array = data_prep.delete_common_mutations(frequency_array, unique_mutations)
+
+    if args_delete_n is not None:
+        frequency_array = data_prep.delete_n_mutations(frequency_array, unique_mutations, args.delete_n)
     # annotate low coverage if per base coveage from qualimap was provided
     data_prep.annotate_non_covered_regions(args.input[0], args.min_cov, frequency_array, file_names, unique_mutations)
 

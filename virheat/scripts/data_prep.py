@@ -195,6 +195,26 @@ def delete_common_mutations(frequency_array, unique_mutations):
 
     return np.delete(frequency_array, mut_to_del, axis=1)
 
+def delete_n_mutations(frequency_array, unique_mutations, min_mut):
+    """
+    delete mutations that are not present in more than n samples
+    """
+    mut_to_del = []
+
+    for idx in range(0, len(frequency_array[0])):
+        n_mutations = 0
+        for frequency_list in frequency_array:
+            if frequency_list[idx] > 0:
+                n_mutations += 1
+        # check if min_mut was reached and if not mark as to delete
+        if n_mutations <= min_mut:
+            mut_to_del.append(idx)
+    # delete the mutations that are found only min_mut times in all samples
+    for idx in sorted(mut_to_del, reverse=True):
+        del unique_mutations[idx]
+
+    return np.delete(frequency_array, mut_to_del, axis=1)
+
 
 def parse_gff3(file):
     """
