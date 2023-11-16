@@ -216,6 +216,18 @@ def delete_n_mutations(frequency_array, unique_mutations, min_mut):
     return np.delete(frequency_array, mut_to_del, axis=1)
 
 
+def zoom_to_genomic_regions(unique_mutations, start_stop):
+    """
+    restrict the displayed mutations to a user defined genomic range
+    """
+    zoomed_unique = []
+
+    for mutation in unique_mutations:
+        if start_stop[0] <= int(mutation.split("_")[0]) <= start_stop[1]:
+            zoomed_unique.append(mutation)
+
+    return zoomed_unique
+
 def parse_gff3(file):
     """
     parse gff3 to dictionary

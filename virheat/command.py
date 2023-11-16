@@ -81,6 +81,14 @@ def get_args(sysargs):
         help="do not show mutations that occur n times or less (default: Do not delete)"
     )
     parser.add_argument(
+        "-z",
+        "--zoom",
+        type=int,
+        metavar=("start", "stop"),
+        nargs=2,
+        help="restrict the plot to a specific genomic region."
+    )
+    parser.add_argument(
         "--sort",
         action=argparse.BooleanOptionalAction,
         default=False,
@@ -118,9 +126,10 @@ def main(sysargs=sys.argv[1:]):
     vcf_files = data_prep.get_files(args.input[0], "vcf")
     if args.sort:
         vcf_files = sorted(vcf_files, key=lambda x: data_prep.get_digit_and_alpha(os.path.basename(x)))
-
     # extract vcf info
     reference_name, frequency_lists, unique_mutations, file_names = data_prep.extract_vcf_data(vcf_files, threshold=args.threshold)
+    if args.zoom:
+        unique_mutations = data_prep.zoom_to_genomic_regions(unique_mutations, args.zoom)
     frequency_array = data_prep.create_freq_array(unique_mutations, frequency_lists)
     # user specified delete options (removes mutations based on various rationales)
     if args.delete:
@@ -166,12 +175,23 @@ def main(sysargs=sys.argv[1:]):
     # ini the fig
     fig, ax = plt.subplots(figsize=[y_size, x_size])
 
+    # define boundaries for the plot
+    if args.zoom:
+        start, stop = args.zoom[0], args.zoom[1]
+        # rescue plot if invalid zoom values are given
+        if args.zoom[0] < 0:
+            start = 0
+        if args.zoom[1] > genome_end:
+            stop = genome_end
+    else:
+        start, stop = 0, genome_end
+
     # plot all elements
     cmap = cm.gist_heat_r
     cmap.set_bad('silver', 1.)
     cmap_cells = cm.ScalarMappable(norm=colors.Normalize(0, 1), cmap=cmap)
     plotting.create_heatmap(ax, frequency_array, cmap_cells)
-    mutation_set = plotting.create_genome_vis(ax, genome_y_location, n_mutations, unique_mutations, genome_end)
+    mutation_set = plotting.create_genome_vis(ax, genome_y_location, n_mutations, unique_mutations, start, stop)
     if args.gff3_path is not None:
         if genes_with_mutations:
             # distinct colors for the genes
@@ -179,7 +199,7 @@ def main(sysargs=sys.argv[1:]):
             colors_genes = [cmap_genes(i) for i in range(len(genes_with_mutations))]
             # plot gene track
             plotting.create_gene_vis(ax, genes_with_mutations, n_mutations, y_size, n_tracks, genome_end, min_y_location, genome_y_location, colors_genes)
-    plotting.create_axis(ax, n_mutations, min_y_location, n_samples, file_names, genome_end, genome_y_location, unique_mutations, reference_name)
+    plotting.create_axis(ax, n_mutations, min_y_location, n_samples, file_names, start, stop, genome_y_location, unique_mutations, reference_name)
     plotting.create_colorbar(args.threshold, cmap_cells, min_y_location, n_samples, ax)
     plotting.create_mutation_legend(mutation_set, min_y_location, n_samples)
 

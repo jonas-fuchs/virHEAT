@@ -25,7 +25,7 @@ def create_heatmap(ax, frequency_array, cmap):
         y_start += 1
 
 
-def create_genome_vis(ax, genome_y_location, n_mutations, unique_mutations, genome_end):
+def create_genome_vis(ax, genome_y_location, n_mutations, unique_mutations, genome_start, genome_stop):
     """
     create the genome rectangle, mutations and mappings to the heatmap
     """
@@ -51,11 +51,12 @@ def create_genome_vis(ax, genome_y_location, n_mutations, unique_mutations, geno
 
     # create mutation lines on the genome rectangle and the mapping to the respective cells
     x_start = 0
+    length = genome_stop - genome_start
     for mutation in unique_mutations:
         mutation_attributes = mutation.split("_")
         mutation_color = mutation_type_colors[mutation_attributes[3]]
         mutation_set.add(mutation_attributes[3])
-        mutation_x_location = n_mutations/genome_end*int(mutation_attributes[0])
+        mutation_x_location = n_mutations/length*(int(mutation_attributes[0])-genome_start)
         # create mutation lines
         plt.vlines(x=mutation_x_location, ymin=y_min, ymax=y_max, color=mutation_color)
         # create polygon
@@ -111,7 +112,7 @@ def create_mutation_legend(mutation_set, min_y_location, n_samples):
     plt.legend(bbox_to_anchor=(1.01, 0.95-(n_samples/(min_y_location+n_samples))), handles=legend_patches)
 
 
-def create_axis(ax, n_mutations, min_y_location, n_samples, file_names, genome_end, genome_y_location, unique_mutations, reference_name):
+def create_axis(ax, n_mutations, min_y_location, n_samples, file_names, start, stop, genome_y_location, unique_mutations, reference_name):
     """
     create the axis of the plot
     """
@@ -120,17 +121,18 @@ def create_axis(ax, n_mutations, min_y_location, n_samples, file_names, genome_e
     ax.set_xlim(0, n_mutations)
     ax.set_ylim(-min_y_location, n_samples)
     # define new ticks depending on the genome size
+    axis_length = stop - start
     if n_mutations >= 20:
-        xtick_dis = round(genome_end/6, -int(math.log10(genome_end / 6)) + 1)
-        xtick_labels = [0, xtick_dis, xtick_dis*2, xtick_dis*3, xtick_dis*4, xtick_dis*5, genome_end]
+        xtick_dis = round(axis_length/6, -int(math.log10(axis_length / 6)) + 1)
+        xtick_labels = [start, start + xtick_dis, start + xtick_dis*2, start + xtick_dis*3, start + xtick_dis*4, start + xtick_dis*5, stop]
     elif n_mutations >= 10:
-        xtick_dis = round(genome_end / 3, -int(math.log10(genome_end / 3)) + 1)
-        xtick_labels = [0, xtick_dis, xtick_dis * 2, genome_end]
+        xtick_dis = round(axis_length / 3, -int(math.log10(axis_length / 3)) + 1)
+        xtick_labels = [start, start + xtick_dis, start + xtick_dis * 2, stop]
     else:
-        xtick_labels = [0, genome_end]
+        xtick_labels = [start, stop]
     xtick_labels = [int(tick) for tick in xtick_labels]
     # get the correct location of the genome pos on the axis
-    xticks = [n_mutations/genome_end*tick for tick in xtick_labels]
+    xticks = [n_mutations/axis_length*(tick - start) for tick in xtick_labels]
     # set new ticks and change spines/yaxis
     ax.set_xticks(xticks, xtick_labels)
     # set y axis labels
