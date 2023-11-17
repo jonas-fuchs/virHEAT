@@ -60,6 +60,8 @@ positional arguments:
 
 options:
   -h, --help            show this help message and exit
+  --name virHEAT_plot.pdf
+                        plot name and file type (pdf, png, svg, jpg). Default: virHEAT_plot.pdf
   -l None, --genome-length None
                         length of the genome (needed if gff3 is not provided)
   -g None, --gff3-path None

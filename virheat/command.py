@@ -33,6 +33,13 @@ def get_args(sysargs):
         help="folder containing input files and output folder"
     )
     parser.add_argument(
+        "--name",
+        type=str,
+        metavar="virHEAT_plot.pdf",
+        default="virHEAT_plot.pdf",
+        help="plot name and file type (pdf, png, svg, jpg). Default: virHEAT_plot.pdf"
+    )
+    parser.add_argument(
         "-l",
         "--genome-length",
         type=int,
@@ -126,22 +133,24 @@ def main(sysargs=sys.argv[1:]):
     vcf_files = data_prep.get_files(args.input[0], "vcf")
     if args.sort:
         vcf_files = sorted(vcf_files, key=lambda x: data_prep.get_digit_and_alpha(os.path.basename(x)))
+
     # extract vcf info
     reference_name, frequency_lists, unique_mutations, file_names = data_prep.extract_vcf_data(vcf_files, threshold=args.threshold)
     if args.zoom:
         unique_mutations = data_prep.zoom_to_genomic_regions(unique_mutations, args.zoom)
     frequency_array = data_prep.create_freq_array(unique_mutations, frequency_lists)
+
     # user specified delete options (removes mutations based on various rationales)
     if args.delete:
         frequency_array = data_prep.delete_common_mutations(frequency_array, unique_mutations)
     if args.delete_n is not None:
         frequency_array = data_prep.delete_n_mutations(frequency_array, unique_mutations, args.delete_n)
+
     # annotate low coverage if per base coveage from qualimap was provided
     data_prep.annotate_non_covered_regions(args.input[0], args.min_cov, frequency_array, file_names, unique_mutations)
 
     # define relative locations of all items in the plot
-    n_samples = len(frequency_array)
-    n_mutations = len(frequency_array[0])
+    n_samples, n_mutations = len(frequency_array), len(frequency_array[0])
     if n_mutations == 0:
         sys.exit("\033[31m\033[1mERROR:\033[0m Frequency array seems to be empty. There is nothing to plot.")
     if n_samples < 4:
@@ -208,5 +217,5 @@ def main(sysargs=sys.argv[1:]):
         os.makedirs(args.input[1])
 
     # save fig
-    fig.savefig(os.path.join(args.input[1], "virHEAT_plot.pdf"), bbox_inches="tight")
+    fig.savefig(os.path.join(args.input[1], args.name), bbox_inches="tight")
 
