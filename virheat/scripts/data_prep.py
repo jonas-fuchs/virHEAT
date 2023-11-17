@@ -271,6 +271,8 @@ def get_genome_end(gff3_dict):
 
     genome_end = 0
 
+    if "region" not in gff3_dict:
+        sys.exit("\033[31m\033[1mERROR:\033[0m Region annotation is missing in the gff3!")
     for attribute in gff3_dict["region"].keys():
         stop = gff3_dict["region"][attribute]["stop"]
         if stop > genome_end:
