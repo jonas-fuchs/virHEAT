@@ -33,6 +33,13 @@ def get_args(sysargs):
         help="folder containing input files and output folder"
     )
     parser.add_argument(
+        "--name",
+        type=str,
+        metavar="virHEAT_plot.pdf",
+        default="virHEAT_plot.pdf",
+        help="plot name and file type (pdf, png, svg, jpg). Default: virHEAT_plot.pdf"
+    )
+    parser.add_argument(
         "-l",
         "--genome-length",
         type=int,
@@ -81,6 +88,14 @@ def get_args(sysargs):
         help="do not show mutations that occur n times or less (default: Do not delete)"
     )
     parser.add_argument(
+        "-z",
+        "--zoom",
+        type=int,
+        metavar=("start", "stop"),
+        nargs=2,
+        help="restrict the plot to a specific genomic region."
+    )
+    parser.add_argument(
         "--sort",
         action=argparse.BooleanOptionalAction,
         default=False,
@@ -121,18 +136,21 @@ def main(sysargs=sys.argv[1:]):
 
     # extract vcf info
     reference_name, frequency_lists, unique_mutations, file_names = data_prep.extract_vcf_data(vcf_files, threshold=args.threshold)
+    if args.zoom:
+        unique_mutations = data_prep.zoom_to_genomic_regions(unique_mutations, args.zoom)
     frequency_array = data_prep.create_freq_array(unique_mutations, frequency_lists)
+
     # user specified delete options (removes mutations based on various rationales)
     if args.delete:
         frequency_array = data_prep.delete_common_mutations(frequency_array, unique_mutations)
     if args.delete_n is not None:
         frequency_array = data_prep.delete_n_mutations(frequency_array, unique_mutations, args.delete_n)
+
     # annotate low coverage if per base coveage from qualimap was provided
     data_prep.annotate_non_covered_regions(args.input[0], args.min_cov, frequency_array, file_names, unique_mutations)
 
     # define relative locations of all items in the plot
-    n_samples = len(frequency_array)
-    n_mutations = len(frequency_array[0])
+    n_samples, n_mutations = len(frequency_array), len(frequency_array[0])
     if n_mutations == 0:
         sys.exit("\033[31m\033[1mERROR:\033[0m Frequency array seems to be empty. There is nothing to plot.")
     if n_samples < 4:
@@ -166,20 +184,31 @@ def main(sysargs=sys.argv[1:]):
     # ini the fig
     fig, ax = plt.subplots(figsize=[y_size, x_size])
 
+    # define boundaries for the plot
+    if args.zoom:
+        start, stop = args.zoom[0], args.zoom[1]
+        # rescue plot if invalid zoom values are given
+        if args.zoom[0] < 0:
+            start = 0
+        if args.zoom[1] > genome_end:
+            stop = genome_end
+    else:
+        start, stop = 0, genome_end
+
     # plot all elements
     cmap = cm.gist_heat_r
     cmap.set_bad('silver', 1.)
     cmap_cells = cm.ScalarMappable(norm=colors.Normalize(0, 1), cmap=cmap)
     plotting.create_heatmap(ax, frequency_array, cmap_cells)
-    mutation_set = plotting.create_genome_vis(ax, genome_y_location, n_mutations, unique_mutations, genome_end)
+    mutation_set = plotting.create_genome_vis(ax, genome_y_location, n_mutations, unique_mutations, start, stop)
     if args.gff3_path is not None:
         if genes_with_mutations:
             # distinct colors for the genes
             cmap_genes = plt.get_cmap('tab20', len(genes_with_mutations))
             colors_genes = [cmap_genes(i) for i in range(len(genes_with_mutations))]
             # plot gene track
-            plotting.create_gene_vis(ax, genes_with_mutations, n_mutations, y_size, n_tracks, genome_end, min_y_location, genome_y_location, colors_genes)
-    plotting.create_axis(ax, n_mutations, min_y_location, n_samples, file_names, genome_end, genome_y_location, unique_mutations, reference_name)
+            plotting.create_gene_vis(ax, genes_with_mutations, n_mutations, y_size, n_tracks, start, stop, min_y_location, genome_y_location, colors_genes)
+    plotting.create_axis(ax, n_mutations, min_y_location, n_samples, file_names, start, stop, genome_y_location, unique_mutations, reference_name)
     plotting.create_colorbar(args.threshold, cmap_cells, min_y_location, n_samples, ax)
     plotting.create_mutation_legend(mutation_set, min_y_location, n_samples)
 
@@ -188,5 +217,5 @@ def main(sysargs=sys.argv[1:]):
         os.makedirs(args.input[1])
 
     # save fig
-    fig.savefig(os.path.join(args.input[1], "virHEAT_plot.pdf"), bbox_inches="tight")
+    fig.savefig(os.path.join(args.input[1], args.name), bbox_inches="tight")
 

@@ -60,6 +60,8 @@ positional arguments:
 
 options:
   -h, --help            show this help message and exit
+  --name virHEAT_plot.pdf
+                        plot name and file type (pdf, png, svg, jpg). Default: virHEAT_plot.pdf
   -l None, --genome-length None
                         length of the genome (needed if gff3 is not provided)
   -g None, --gff3-path None
@@ -70,7 +72,9 @@ options:
   --delete, --no-delete
                         delete mutations that are present in all samples and their maximum frequency divergence is smaller than 0.5 (default: True)
   -n None, --delete-n None
-                        do not show mutations that occur n times or less (default: Do not delete)                      
+                        do not show mutations that occur n times or less (default: Do not delete)
+  -z start stop, --zoom start stop
+                        restrict the plot to a specific genomic region.                      
   --sort, --no-sort     sort sample names alphanumerically (default: False)
   --min-cov 20          display mutations covered at least x time (only if per base cov tsv files are provided)
   -v, --version         show program's version number and exit
