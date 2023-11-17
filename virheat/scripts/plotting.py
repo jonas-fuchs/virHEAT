@@ -25,7 +25,7 @@ def create_heatmap(ax, frequency_array, cmap):
         y_start += 1
 
 
-def create_genome_vis(ax, genome_y_location, n_mutations, unique_mutations, genome_start, genome_stop):
+def create_genome_vis(ax, genome_y_location, n_mutations, unique_mutations, start, stop):
     """
     create the genome rectangle, mutations and mappings to the heatmap
     """
@@ -51,12 +51,12 @@ def create_genome_vis(ax, genome_y_location, n_mutations, unique_mutations, geno
 
     # create mutation lines on the genome rectangle and the mapping to the respective cells
     x_start = 0
-    length = genome_stop - genome_start
+    length = stop - start
     for mutation in unique_mutations:
         mutation_attributes = mutation.split("_")
         mutation_color = mutation_type_colors[mutation_attributes[3]]
         mutation_set.add(mutation_attributes[3])
-        mutation_x_location = n_mutations/length*(int(mutation_attributes[0])-genome_start)
+        mutation_x_location = n_mutations/length*(int(mutation_attributes[0])-start)
         # create mutation lines
         plt.vlines(x=mutation_x_location, ymin=y_min, ymax=y_max, color=mutation_color)
         # create polygon
@@ -156,27 +156,36 @@ def create_axis(ax, n_mutations, min_y_location, n_samples, file_names, start, s
     ax.spines["left"].set_visible(False)
 
 
-def create_gene_vis(ax, genes_with_mutations, n_mutations, y_size, n_tracks, genome_end, min_y_location, genome_y_location, colors_genes):
+def create_gene_vis(ax, genes_with_mutations, n_mutations, y_size, n_tracks, start, stop, min_y_location, genome_y_location, colors_genes):
     """
     create the vis for the gene
     """
 
     gene_annotations = []
-    mult_factor = n_mutations/genome_end
+    mult_factor = n_mutations/(stop-start)
 
     for idx, gene in enumerate(genes_with_mutations):
-        start = (mult_factor*genes_with_mutations[gene][0][0], -min_y_location+(n_tracks-genes_with_mutations[gene][1])*genome_y_location/2-genome_y_location/2)
-        stop = mult_factor*genes_with_mutations[gene][0][1]
+        # define the plotting values for the patch
+        if genes_with_mutations[gene][0][0] < start:
+            x_value = 0
+        else:
+            x_value = mult_factor*(genes_with_mutations[gene][0][0]-start)
+        y_value = -min_y_location+(n_tracks-genes_with_mutations[gene][1])*genome_y_location/2-genome_y_location/2
+        if genes_with_mutations[gene][0][1] > stop:
+            width = n_mutations - x_value
+        else:
+            width = mult_factor*(genes_with_mutations[gene][0][1]-start) - x_value
         height = genome_y_location/2
+        # plot the patch
         ax.add_patch(
             patches.FancyBboxPatch(
-                                start, stop-start[0], height,
+                                (x_value, y_value), width, height,
                                 boxstyle="round,pad=-0.0040,rounding_size=0.03",
                                 ec="black", fc=colors_genes[idx]
                             )
         )
         # define text pos for gene description inside or below the gene box, depending if it fits within
-        if stop-start[0] > n_mutations/(y_size*8)*len(gene):
-            gene_annotations.append(ax.text(start[0]+(stop-start[0])/2, start[1]+height/2, gene, ha="center", va="center"))
+        if width > n_mutations/(y_size*8)*len(gene):
+            gene_annotations.append(ax.text(x_value+width/2, y_value+height/2, gene, ha="center", va="center"))
         else:
-            gene_annotations.append(ax.text(start[0]+(stop-start[0])/2, start[1]-height/4, gene, rotation=40, rotation_mode="anchor", ha="right", va="bottom"))
+            gene_annotations.append(ax.text(x_value+width/2, y_value-height/4, gene, rotation=40, rotation_mode="anchor", ha="right", va="bottom"))
