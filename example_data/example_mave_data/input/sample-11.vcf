@@ -1,0 +1,30 @@
+##fileformat=VCFv4.0
+##FILTER=<ID=PASS,Description="All filters passed">
+##fileDate=20240114
+##source=lofreq call --verbose --ref reference.fa --call-indels --min-cov 5 --max-depth 1000000 --min-bq 30 --min-alt-bq 30 --min-mq 20 --max-mq 255 --min-jq 0 --min-alt-jq 0 --def-alt-jq 0 --sig 0.0005 --bonf dynamic --no-default-filter --no-default-filter -r NC_045512.2:1-7475 -o /data/jwd05e/main/066/348/66348166/tmp/lofreq2_call_parallel2hkqokkg/0.vcf.gz reads.bam 
+##reference=reference.fa
+##INFO=<ID=DP,Number=1,Type=Integer,Description="Raw Depth">
+##INFO=<ID=AF,Number=1,Type=Float,Description="Lofreq Allele Frequency; Fraction of variant-supporting bases with q > --min-bq among all bases at the site">
+##INFO=<ID=SB,Number=1,Type=Integer,Description="Phred-scaled strand bias at this position">
+##INFO=<ID=DP4,Number=4,Type=Integer,Description="Counts for ref-forward bases, ref-reverse, alt-forward and alt-reverse bases">
+##INFO=<ID=INDEL,Number=0,Type=Flag,Description="Indicates that the variant is an INDEL.">
+##INFO=<ID=CONSVAR,Number=0,Type=Flag,Description="Indicates that the variant is a consensus variant (as opposed to a low frequency variant).">
+##INFO=<ID=HRUN,Number=1,Type=Integer,Description="Homopolymer length to the right of report indel position">
+##FILTER=<ID=min_snvqual_57,Description="Minimum SNV Quality (Phred) 57">
+##FILTER=<ID=min_indelqual_40,Description="Minimum Indel Quality (Phred) 40">
+##FILTER=<ID=min_snvqual_59,Description="Minimum SNV Quality (Phred) 59">
+##FILTER=<ID=min_indelqual_41,Description="Minimum Indel Quality (Phred) 41">
+##contig=<ID=NC_045512.2>
+##INFO=<ID=AmpliconBias,Number=0,Type=Flag,Description="Indicates that the AF value of the variant could not be corrected for potential amplicon bias.">
+##bcftools_annotateVersion=1.10.2+htslib-1.10.2
+##bcftools_annotateCommand=annotate --columns QUAL,INFO --annotations annotations.vcf.gz --mark-sites -AmpliconBias --output-type v --threads 1 input.vcf.gz; Date=Sun Jan 14 21:54:25 2024
+##bcftools_annotateCommand=annotate --columns QUAL,INFO --annotations annotations.vcf.gz --mark-sites +AmpliconBias --output-type v --threads 1 input.vcf.gz; Date=Sun Jan 14 21:55:39 2024
+##SnpEffVersion="4.5covid19 (build 2020-04-15 22:26), by Pablo Cingolani"
+##SnpEffCmd="SnpEff  -i vcf -o vcf -formatEff -classic -no-downstream -no-intergenic -no-upstream -stats /data/jwd05e/main/066/348/66348346/outputs/dataset_3109d163-b480-42e6-a09b-98d2487b79fc.dat NC_045512.2 /data/dnb09/galaxy_db/files/0/5/7/dataset_0573f2f9-0002-4ea7-8a3c-e2aff7b2f927.dat "
+##INFO=<ID=EFF,Number=.,Type=String,Description="Predicted effects for this variant.Format: 'Effect ( Effect_Impact | Functional_Class | Codon_Change | Amino_Acid_Change| Amino_Acid_length | Gene_Name | Transcript_BioType | Gene_Coding | Transcript_ID | Exon_Rank  | Genotype [ | ERRORS | WARNINGS ] )' ">
+##INFO=<ID=LOF,Number=.,Type=String,Description="Predicted loss of function effects for this variant. Format: 'Gene_Name | Gene_ID | Number_of_transcripts_in_gene | Percent_of_transcripts_affected'">
+##INFO=<ID=NMD,Number=.,Type=String,Description="Predicted nonsense mediated decay effects for this variant. Format: 'Gene_Name | Gene_ID | Number_of_transcripts_in_gene | Percent_of_transcripts_affected'">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+NC_045512.2	16239	.	T	TG	44.0	PASS	DP=149;AF=0.013423;SB=0;DP4=96,92,1,1;INDEL;HRUN=1;EFF=FRAME_SHIFT(HIGH||gtt/gGtt|V5326G?|7096|ORF1ab|protein_coding|CODING|GU280_gp01|2|TG|INFO_REALIGN_3_PRIME),FRAME_SHIFT(HIGH||gtt/gGtt|V2G?|600|ORF1ab|protein_coding|CODING|YP_009725308.1|1|TG|WARNING_TRANSCRIPT_NO_START_CODON&INFO_REALIGN_3_PRIME);LOF=(ORF1ab|GU280_gp01|28|0.04)
+NC_045512.2	16410	.	A	T	70.0	PASS	DP=183;AF=0.021858;SB=0;DP4=80,97,3,3;EFF=SYNONYMOUS_CODING(LOW|SILENT|acA/acT|T5382|7096|ORF1ab|protein_coding|CODING|GU280_gp01|2|T),SYNONYMOUS_CODING(LOW|SILENT|acA/acT|T58|600|ORF1ab|protein_coding|CODING|YP_009725308.1|1|T|WARNING_TRANSCRIPT_NO_START_CODON)
+NC_045512.2	27807	.	C	T	14238.0	PASS	DP=410;AF=0.926829;SB=3;DP4=0,1,206,202;EFF=SYNONYMOUS_CODING(LOW|SILENT|Cta/Tta|L18|43|ORF7b|protein_coding|CODING|GU280_gp08|1|T)

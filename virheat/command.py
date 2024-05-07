@@ -109,6 +109,13 @@ def get_args(sysargs):
         help="display mutations covered at least x time (only if per base cov tsv files are provided)"
     )
     parser.add_argument(
+        "-s", "--scores",
+        metavar=('scores_file', 'pos_col', 'score_col', 'score_name'),
+        nargs=4,
+        action='append',
+        help="specify scores to be added to the plot by providing a CSV file containing scores, along with its column for amino-acid positions, its column for scores, and descriptive score names (e.g., expression, binding, antibody escape, etc.). This option can be used multiple times to include multiple sets of scores."
+    )
+    parser.add_argument(
         "-v",
         "--version",
         action='version',
@@ -135,7 +142,10 @@ def main(sysargs=sys.argv[1:]):
         vcf_files = sorted(vcf_files, key=lambda x: data_prep.get_digit_and_alpha(os.path.basename(x)))
 
     # extract vcf info
-    reference_name, frequency_lists, unique_mutations, file_names = data_prep.extract_vcf_data(vcf_files, threshold=args.threshold)
+    if args.scores:
+        reference_name, frequency_lists, unique_mutations, file_names = data_prep.extract_vcf_data(vcf_files, threshold=args.threshold, scores=1)
+    else:
+        reference_name, frequency_lists, unique_mutations, file_names = data_prep.extract_vcf_data(vcf_files, threshold=args.threshold)
     if args.zoom:
         unique_mutations = data_prep.zoom_to_genomic_regions(unique_mutations, args.zoom)
     frequency_array = data_prep.create_freq_array(unique_mutations, frequency_lists)
@@ -169,16 +179,28 @@ def main(sysargs=sys.argv[1:]):
         genome_end = data_prep.get_genome_end(gff3_info)
         genes_with_mutations, n_tracks = data_prep.create_track_dict(unique_mutations, gff3_info, args.gff3_annotations)
         # define space for the genome vis tracks
-        min_y_location = genome_y_location + genome_y_location/2 * (n_tracks+1)
+        if args.scores and n_samples >= 4:
+            min_y_location = genome_y_location + genome_y_location/2 * (n_tracks+1) + 1.7*len(args.scores)
+        else:
+            min_y_location = genome_y_location + genome_y_location/2 * (n_tracks+1)
     elif args.genome_length is not None:
         genome_end = args.genome_length
-        min_y_location = genome_y_location
+        if args.scores:
+            if n_samples < 4:
+                min_y_location = genome_y_location + 2 + len(args.scores) * 0.3
+            else:
+                min_y_location = genome_y_location + math.log2(n_samples) + 1.7 * len(args.scores)
+        else:
+            min_y_location = genome_y_location
     else:
         sys.exit("\033[31m\033[1mERROR:\033[0m Provide either a gff3 file (-g) or the length (-l) of the genome which you used for mapping")
 
     # define size of the plot
     y_size = n_mutations*0.4
-    x_size = y_size*(n_samples+min_y_location)/n_mutations
+    if args.scores:
+        x_size = y_size * (n_samples + min_y_location + len(args.scores)) / n_mutations
+    else:
+        x_size = y_size*(n_samples+min_y_location)/n_mutations
     x_size = x_size-x_size*0.15  # compensate of heatmap annotation
 
     # ini the fig
@@ -201,16 +223,53 @@ def main(sysargs=sys.argv[1:]):
     cmap_cells = cm.ScalarMappable(norm=colors.Normalize(0, 1), cmap=cmap)
     plotting.create_heatmap(ax, frequency_array, cmap_cells)
     mutation_set = plotting.create_genome_vis(ax, genome_y_location, n_mutations, unique_mutations, start, stop)
+    if args.scores:
+        scores_files = args.scores
+        n_scoresets = len(scores_files)
+        score_count = 0
+        plotting.create_axis(ax, n_mutations, min_y_location, n_samples, file_names, start, stop, genome_y_location, unique_mutations, reference_name, n_scoresets)
+        plotting.create_mutation_legend(mutation_set, min_y_location, n_samples, n_scoresets)
+        for score_params in args.scores:
+            score_count += 1
+            scores_file, pos_col, score_col, score_name = score_params
+            unique_scores = data_prep.extract_scores(unique_mutations, scores_file, pos_col, score_col)
+            score_set = plotting.create_scores_vis(ax, genome_y_location, n_mutations, unique_scores, start, stop, score_name=score_name, score_count=score_count)
+            cmap_scores = plt.cm.get_cmap('coolwarm')  # blue to red colormap
+            if n_scoresets<3:
+                plotting.create_scores_cbar(cmap_scores, min_y_location, n_scoresets, score_set, score_name, score_count, ax)
+
+        # plotting colorbars for scorsets if more than 3 scoresets - move colorbars under
+        if n_scoresets > 2:
+            ax2 = fig.add_axes(ax.get_position(), frameon=False)
+            ax2.set_position([ax.get_position().x0, ax.get_position().y0 - 1.1 * ax.get_position().height*0.5,
+                              ax.get_position().width, 0.4])
+            ax2.set_xticks([])
+            ax2.set_yticks([])
+            score_count = 0
+            for score_params in args.scores:
+                score_count += 1
+                scores_file, pos_col, score_col, score_name = score_params
+                unique_scores = data_prep.extract_scores(unique_mutations, scores_file, pos_col, score_col)
+                score_set = plotting.create_scores_vis(ax, genome_y_location, n_mutations, unique_scores, start, stop, score_name=score_name, score_count=score_count, no_plot=1)
+                cmap_scores = plt.cm.get_cmap('coolwarm')
+                plotting.create_scores_cbar(cmap_scores, min_y_location, n_scoresets, score_set, score_name, score_count, ax2)
+    else:
+        plotting.create_axis(ax, n_mutations, min_y_location, n_samples, file_names, start, stop, genome_y_location, unique_mutations, reference_name)
+        plotting.create_mutation_legend(mutation_set, min_y_location, n_samples)
+
     if args.gff3_path is not None:
         if genes_with_mutations:
             # distinct colors for the genes
             cmap_genes = plt.get_cmap('tab20', len(genes_with_mutations))
             colors_genes = [cmap_genes(i) for i in range(len(genes_with_mutations))]
             # plot gene track
-            plotting.create_gene_vis(ax, genes_with_mutations, n_mutations, y_size, n_tracks, start, stop, min_y_location, genome_y_location, colors_genes)
-    plotting.create_axis(ax, n_mutations, min_y_location, n_samples, file_names, start, stop, genome_y_location, unique_mutations, reference_name)
+            if args.scores and n_samples >= 4:
+                min_y_location_sc = min_y_location - 1.7 * len(args.scores)
+                plotting.create_gene_vis(ax, genes_with_mutations, n_mutations, y_size, n_tracks, start, stop, min_y_location_sc, genome_y_location, colors_genes)
+            else:
+                plotting.create_gene_vis(ax, genes_with_mutations, n_mutations, y_size, n_tracks, start, stop, min_y_location, genome_y_location, colors_genes)
+
     plotting.create_colorbar(args.threshold, cmap_cells, min_y_location, n_samples, ax)
-    plotting.create_mutation_legend(mutation_set, min_y_location, n_samples)
 
     # create output folder
     if not os.path.exists(args.input[1]):

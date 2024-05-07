@@ -77,6 +77,9 @@ options:
                         restrict the plot to a specific genomic region.                      
   --sort, --no-sort     sort sample names alphanumerically (default: False)
   --min-cov 20          display mutations covered at least x time (only if per base cov tsv files are provided)
+  -s scores_file pos_col score_col score_name, --scores scores_file pos_col score_col score_name
+                        specify scores to be added to the plot by providing a CSV file containing scores, along with its column for amino-acid positions, its column for scores, and descriptive score names (e.g., expression, binding, antibody escape, etc.).
+                        This option can be used multiple times to include multiple sets of scores.
   -v, --version         show program's version number and exit
 ```
 
@@ -84,6 +87,10 @@ You need to either provide the length of your reference genome or if you want to
 
 Additionally, you can also analyse if mutations are sufficiently covered and display non-covered cells in grey. For that first create a per base coverage tsv files for each bam file with [Qualimap](http://qualimap.conesalab.org/) and provide it in the same folder as the vcf files. Give them the same name as your vcf files.
 
+Moreover, there is an option to include visualizations of additional scores (e.g., MAVE scores for binding affinity, expression level, antibody escape, etc.) mapped to mutations on the heatmap. To utilize this feature, use the -s or --scores 
+argument, and provide the following arguments: 1) path to the CSV file containing scores; 2) the name of the column in this file containing mutation positions in classic notation (e.g., T430Y); 3) the name of the column in this file containing the 
+scores themselves; 4) a descriptive score name that will be used as labels in the plot. Multiple score sets can be included simultaneously by repeating the -s or --scores option with different arguments. For example input and possible output data,
+please refer to the files located in the  [example_data/example_mave_data](https://github.com/{repo}/tree/main/example_data/example_mave_data) folder.
 ---
 
 **Important disclaimer:**

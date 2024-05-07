@@ -4,10 +4,14 @@ contains all plotting functions of virHEAT
 
 # BUILT-INS
 import math
+import numpy as np
+import textwrap
 
 # LIBS
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
+import matplotlib.colors as mcolors
+import matplotlib.cm as cm
 
 
 def create_heatmap(ax, frequency_array, cmap):
@@ -67,6 +71,70 @@ def create_genome_vis(ax, genome_y_location, n_mutations, unique_mutations, star
     return mutation_set
 
 
+def create_scores_vis(ax, genome_y_location, n_mutations, unique_mutations, start, stop, score_name=None, score_count=None, no_plot=0):
+    """
+    create the scores rectangles, mappings to the reference
+    """
+    y_min = -genome_y_location
+    y_max = -genome_y_location+genome_y_location/2
+    if score_name:
+        score_set = []
+        for mutation in unique_mutations:
+            mutation_attributes = mutation.split("_")
+            score_set.append(float(mutation_attributes[5]))
+        score_set = [value for value in score_set if not np.isnan(value)]
+        if score_set:
+            norm = mcolors.Normalize(vmin=min(score_set), vmax=max(score_set))  # Normalization for the score range
+        else:
+            print("\033[31m\033[1mERROR:\033[0m Seems like there are no scores in the score set '{}' corresponding to the plotted mutation positions.".format(score_name))
+        cmap = plt.cm.get_cmap('coolwarm')  # blue to red colormap
+        ax.text(-0.02 * n_mutations, y_min - (score_count + 1.5) * (genome_y_location / 2), score_name, ha='right', va='center')
+
+        # create a rectangle for the scores
+        rect = patches.FancyBboxPatch(
+            (0, y_min - (score_count + 2) * (genome_y_location / 2)), n_mutations*1.5, y_max - y_min,
+            boxstyle="round,pad=-0.0040,rounding_size=0.03",
+            ec="lightgray", fc=(0, 0, 0, 0.05)
+        )
+        ax.add_patch(rect)
+
+    # create score lines on the score rectangle and the mapping to the respective mutation lines
+    x_start = 0
+    length = stop - start
+    for mutation in unique_mutations:
+        mutation_attributes = mutation.split("_")
+        mutation_x_location = n_mutations/length*(int(mutation_attributes[0])-start)
+        x_start += 1
+        # create lines for score_set
+        if score_name and no_plot !=1:
+            if score_set:
+                score_value = float(mutation_attributes[5])
+                if score_value in score_set:
+                    color = cmap(norm(score_value))  # map score to colormap
+                    plt.vlines(x=mutation_x_location, ymin=y_min - (score_count + 2) * (genome_y_location / 2), ymax=y_max - (score_count + 2) * (genome_y_location / 2), color=color, linestyle='-')
+
+    return score_set
+
+
+def create_scores_cbar(cmap, min_y_location, n_scoresets, score_set, score_name, score_count, ax):
+    """
+    create a colorbar for the scoreset
+    """
+    if score_set:
+        if n_scoresets<3:
+            cbar = plt.colorbar(cm.ScalarMappable(cmap=cmap, norm=mcolors.Normalize(vmin=min(score_set), vmax=max(score_set))),
+            pad=0, shrink=1.5 / (min_y_location + 1), anchor=(-0.8, 0),
+            aspect=15, orientation='vertical', ax=ax, label=score_name)
+        else:
+            cbar = plt.colorbar(cm.ScalarMappable(cmap=cmap, norm=mcolors.Normalize(vmin=min(score_set), vmax=max(score_set))), label=score_name, ax=ax)
+            ax_pos = ax.get_position()
+            cbar.ax.set_position([ax_pos.x0 + score_count * 0.05, ax_pos.y0, ax_pos.width * 0.7, ax_pos.height*0.9])
+        ticks = [min(score_set), min(score_set)+abs((max(score_set)-min(score_set))/2), max(score_set), 0]
+        cbar.set_ticks(ticks)
+        cbar.ax.tick_params(direction='in', labelsize='x-small')
+        cbar.set_label('\n'.join(textwrap.wrap(score_name, 20)), size='x-small')
+
+
 def create_colorbar(threshold, cmap, min_y_location, n_samples, ax):
     """
     creates a custom colorbar and annotates the threshold
@@ -96,7 +164,7 @@ def create_colorbar(threshold, cmap, min_y_location, n_samples, ax):
     cbar.set_ticklabels(labels)
 
 
-def create_mutation_legend(mutation_set, min_y_location, n_samples):
+def create_mutation_legend(mutation_set, min_y_location, n_samples, n_scoresets=0):
     """
     create a legend for the mutation type
     """
@@ -109,17 +177,20 @@ def create_mutation_legend(mutation_set, min_y_location, n_samples):
     if "SNV" in mutation_set:
         legend_patches.append(patches.Patch(color="dimgrey", label="SNV"))
 
-    plt.legend(bbox_to_anchor=(1.01, 0.95-(n_samples/(min_y_location+n_samples))), handles=legend_patches)
+    if n_scoresets != 0:
+        plt.legend(handles=legend_patches, bbox_to_anchor=(1.02, 0.95 - (n_samples / (min_y_location + n_samples))), loc='upper left', ncol=len(legend_patches))
+    else:
+        plt.legend(bbox_to_anchor=(1.01, 0.95-(n_samples/(min_y_location+n_samples))), handles=legend_patches)
 
 
-def create_axis(ax, n_mutations, min_y_location, n_samples, file_names, start, stop, genome_y_location, unique_mutations, reference_name):
+def create_axis(ax, n_mutations, min_y_location, n_samples, file_names, start, stop, genome_y_location, unique_mutations, reference_name, n_scoresets=0):
     """
     create the axis of the plot
     """
 
     # define plot limits
     ax.set_xlim(0, n_mutations)
-    ax.set_ylim(-min_y_location, n_samples)
+    ax.set_ylim(-min_y_location - n_scoresets, n_samples)
     # define new ticks depending on the genome size
     axis_length = stop - start
     if n_mutations >= 20:
