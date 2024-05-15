@@ -76,8 +76,10 @@ def create_scores_vis(ax, genome_y_location, n_mutations, n_tracks, unique_mutat
     create the scores rectangles, mappings to the reference
     """
     score_set = []
-
-    y_min = -genome_y_location - (n_tracks+1)*(genome_y_location/2) - score_count*(genome_y_location/2)
+    if n_tracks == 0:
+        y_min = -genome_y_location - 1 - score_count * (genome_y_location / 2)
+    else:
+        y_min = -genome_y_location - (n_tracks + 1) * (genome_y_location / 2) - score_count * (genome_y_location / 2)
     y_max = y_min + genome_y_location / 2
 
     if score_name:
@@ -90,7 +92,7 @@ def create_scores_vis(ax, genome_y_location, n_mutations, n_tracks, unique_mutat
         else:
             print("\033[31m\033[1mERROR:\033[0m Seems like there are no scores in the score set '{}' corresponding to the plotted mutation positions.".format(score_name))
         cmap = plt.cm.get_cmap('coolwarm')  # blue to red colormap
-        ax.text(-0.02 * n_mutations, y_min+genome_y_location/4, score_name, ha='right', va='center')
+        ax.text(-0.5, y_min+genome_y_location/4, score_name, ha='right', va='center')
 
         # create a rectangle for the scores
         rect = patches.FancyBboxPatch(
