@@ -71,14 +71,16 @@ def create_genome_vis(ax, genome_y_location, n_mutations, unique_mutations, star
     return mutation_set
 
 
-def create_scores_vis(ax, genome_y_location, n_mutations, unique_mutations, start, stop, score_name=None, score_count=None, no_plot=0):
+def create_scores_vis(ax, genome_y_location, n_mutations, n_tracks, unique_mutations, start, stop, score_name=None, score_count=None):
     """
     create the scores rectangles, mappings to the reference
     """
-    y_min = -genome_y_location
-    y_max = -genome_y_location+genome_y_location/2
+    score_set = []
+
+    y_min = -genome_y_location - (n_tracks+1)*(genome_y_location/2) - score_count*(genome_y_location/2)
+    y_max = y_min + genome_y_location / 2
+
     if score_name:
-        score_set = []
         for mutation in unique_mutations:
             mutation_attributes = mutation.split("_")
             score_set.append(float(mutation_attributes[5]))
@@ -88,11 +90,11 @@ def create_scores_vis(ax, genome_y_location, n_mutations, unique_mutations, star
         else:
             print("\033[31m\033[1mERROR:\033[0m Seems like there are no scores in the score set '{}' corresponding to the plotted mutation positions.".format(score_name))
         cmap = plt.cm.get_cmap('coolwarm')  # blue to red colormap
-        ax.text(-0.02 * n_mutations, y_min - (score_count + 1.5) * (genome_y_location / 2), score_name, ha='right', va='center')
+        ax.text(-0.02 * n_mutations, y_min+genome_y_location/4, score_name, ha='right', va='center')
 
         # create a rectangle for the scores
         rect = patches.FancyBboxPatch(
-            (0, y_min - (score_count + 2) * (genome_y_location / 2)), n_mutations*1.5, y_max - y_min,
+            (0, y_min), n_mutations, y_max - y_min,
             boxstyle="round,pad=-0.0040,rounding_size=0.03",
             ec="lightgray", fc=(0, 0, 0, 0.05)
         )
@@ -106,12 +108,11 @@ def create_scores_vis(ax, genome_y_location, n_mutations, unique_mutations, star
         mutation_x_location = n_mutations/length*(int(mutation_attributes[0])-start)
         x_start += 1
         # create lines for score_set
-        if score_name and no_plot !=1:
-            if score_set:
-                score_value = float(mutation_attributes[5])
-                if score_value in score_set:
-                    color = cmap(norm(score_value))  # map score to colormap
-                    plt.vlines(x=mutation_x_location, ymin=y_min - (score_count + 2) * (genome_y_location / 2), ymax=y_max - (score_count + 2) * (genome_y_location / 2), color=color, linestyle='-')
+        if score_name and score_set:
+            score_value = float(mutation_attributes[5])
+            if score_value in score_set:
+                color = cmap(norm(score_value))  # map score to colormap
+                plt.vlines(x=mutation_x_location, ymin=y_min, ymax=y_max, color=color, linestyle='-')
 
     return score_set
 
@@ -135,7 +136,7 @@ def create_scores_cbar(cmap, min_y_location, n_scoresets, score_set, score_name,
         cbar.set_label('\n'.join(textwrap.wrap(score_name, 20)), size='x-small')
 
 
-def create_colorbar(threshold, cmap, min_y_location, n_samples, ax):
+def create_colorbar(threshold, cmap, min_y_location, n_samples, ax, n_scores=0):
     """
     creates a custom colorbar and annotates the threshold
     """
@@ -159,7 +160,7 @@ def create_colorbar(threshold, cmap, min_y_location, n_samples, ax):
         labels.remove(rounded_threshold)
     ticks.append(threshold)
     labels.append(f"threshold\n={threshold}")
-    cbar = plt.colorbar(cmap, label="variant frequency", pad=0, shrink=n_samples/(min_y_location+n_samples), anchor=(0.1,1), aspect=15, ax=ax)
+    cbar = plt.colorbar(cmap, label="variant frequency", pad=0, shrink=n_samples/(min_y_location+n_samples+n_scores), anchor=(0.1,1), aspect=15, ax=ax)
     cbar.set_ticks(ticks)
     cbar.set_ticklabels(labels)
 
