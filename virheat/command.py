@@ -224,16 +224,7 @@ def main(sysargs=sys.argv[1:]):
                          unique_mutations, reference_name, n_scores)
     plotting.create_mutation_legend(mutation_set, min_y_location, n_samples, n_scores)
     plotting.create_colorbar(args.threshold, cmap_cells, min_y_location, n_samples, ax)
-    # plot scores as track below the genome track
-    if args.scores:
-        score_count = 1
-        for score_params in args.scores:
-            scores_file, pos_col, score_col, score_name = score_params
-            unique_scores = data_prep.extract_scores(unique_mutations, scores_file, pos_col, score_col)
-            track_created = plotting.create_scores_vis(ax, genome_y_location, n_mutations, n_tracks, unique_scores, start, stop, score_count, score_name)
-            if track_created:
-                score_count += 1
-
+    # plot gene track
     if args.gff3_path is not None:
         if genes_with_mutations:
             # distinct colors for the genes
@@ -241,7 +232,15 @@ def main(sysargs=sys.argv[1:]):
             colors_genes = [cmap_genes(i) for i in range(len(genes_with_mutations))]
             # plot gene track
             plotting.create_gene_vis(ax, genes_with_mutations, n_mutations, y_size, n_tracks, start, stop, min_y_location, genome_y_location, colors_genes, n_scores)
-
+    # plot scores as track below the gene/genome track
+    if args.scores:
+        score_count = 1
+        for score_params in args.scores:
+            scores_file, pos_col, score_col, score_name = score_params
+            unique_scores = data_prep.extract_scores(unique_mutations, scores_file, pos_col, score_col)
+            track_created = plotting.create_scores_vis(ax, genome_y_location, n_mutations, n_tracks, unique_scores, start, stop, score_count, score_name)
+            if track_created:  # only creates a track if it finds mutations to annotate
+                score_count += 1
     # create output folder
     if not os.path.exists(args.input[1]):
         os.makedirs(args.input[1])

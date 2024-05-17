@@ -9,7 +9,7 @@ import numpy as np
 # LIBS
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
-import matplotlib.colors as mcolors
+
 
 def create_heatmap(ax, frequency_array, cmap):
     """
@@ -49,7 +49,6 @@ def create_genome_vis(ax, genome_y_location, n_mutations, unique_mutations, star
                             ec="none", fc="lightgrey"
                         )
     )
-
     # create mutation lines on the genome rectangle and the mapping to the respective cells
     x_start = 0
     length = stop - start
@@ -73,7 +72,7 @@ def create_scores_vis(ax, genome_y_location, n_mutations, n_tracks, unique_mutat
     create the scores rectangles, mappings to the reference
     """
     score_set = []
-    y_zero = -genome_y_location - (n_tracks + score_count + 1) * (genome_y_location / 2)
+    y_zero = -genome_y_location - (n_tracks + score_count + 1) * (genome_y_location / 2)  # zero line
     length = stop - start
 
     # create list of tuples [(nt pos, score)]
@@ -81,14 +80,13 @@ def create_scores_vis(ax, genome_y_location, n_mutations, n_tracks, unique_mutat
         mutation_attributes = mutation.split("_")
         if not np.isnan(float(mutation_attributes[5])):
             score_set.append((int(mutation_attributes[0]), float(mutation_attributes[5])))
-
+    # check if there is something to plot
     if score_set:
         # create zero line and score name on the left
         plt.axhline(y=y_zero, color='black', linestyle='-', linewidth=0.5)
         ax.text(-0.5, y_zero, score_name, ha='right', va='center')
-        # define normalization multiplier
+        # define normalization multiplier for the height of the score v lines
         multiplier = max([abs(score[1]) for score in score_set]) / abs((y_zero + genome_y_location / 4) - y_zero)
-
         # create score lines on the score rectangle and the mapping to the respective mutation lines
         for score in score_set:
             # define x value
@@ -100,6 +98,7 @@ def create_scores_vis(ax, genome_y_location, n_mutations, n_tracks, unique_mutat
             else:
                 plt.vlines(x=mutation_x_location, ymin=y_zero, ymax=y_zero + score[1] / multiplier, color="blue", linestyle='-')
         return True
+    # if not the track is not created
     else:
         print("\033[31m\033[1mERROR:\033[0m Seems like there are no scores in the score set '{}' corresponding to the plotted mutation positions.".format(score_name))
         return False
