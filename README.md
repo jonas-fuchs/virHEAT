@@ -20,6 +20,10 @@ Ever wanted to have a condensed look at variant frequencies after mapping your r
 
 ![Example](./example_data/example.png)
 
+## SARS-CoV-2 example with additional score tracks `--scores`
+
+![Example_Scores](./example_mave_data/example_scores.png)
+
 ## Installation
 
 ### via pip (recommened):
@@ -90,7 +94,7 @@ Additionally, you can also analyse if mutations are sufficiently covered and dis
 Moreover, there is an option to include visualizations of additional scores (e.g., MAVE scores for binding affinity, expression level, antibody escape, etc.) mapped to mutations on the heatmap. To utilize this feature, use the -s or --scores 
 argument, and provide the following arguments: 1) path to the CSV file containing scores; 2) the name of the column in this file containing mutation positions in classic notation (e.g., T430Y); 3) the name of the column in this file containing the 
 scores themselves; 4) a descriptive score name that will be used as labels in the plot. Multiple score sets can be included simultaneously by repeating the -s or --scores option with different arguments. For example input and possible output data,
-please refer to the files located in the  [example_data/example_mave_data](./example_data/example_mave_data) folder.
+please refer to the files located in the  [example_data/example_mave_data](example_mave_data) folder.
 
 ---
 
