@@ -82,21 +82,39 @@ def create_scores_vis(ax, genome_y_location, n_mutations, n_tracks, unique_mutat
             score_set.append((int(mutation_attributes[0]), float(mutation_attributes[5])))
     # check if there is something to plot
     if score_set:
-        # create zero line and score name on the left
-        plt.axhline(y=y_zero, color='black', linestyle='-', linewidth=0.5)
-        ax.text(-0.5, y_zero, score_name, ha='right', va='center')
         # define normalization multiplier for the height of the score v lines
-        multiplier = max([abs(score[1]) for score in score_set]) / abs((y_zero + genome_y_location / 4) - y_zero)
-        # create score lines on the score rectangle and the mapping to the respective mutation lines
+        max_value = max([abs(score[1]) for score in score_set])  # max abs in score set
+        multiplier = max_value / abs((y_zero + genome_y_location / 4) - y_zero)
+        # add text for scale and score_name
+        if score_count % 2 == 0:
+            score_name_loc, scale_loc, vline_loc = ax.get_xlim()[1] + 0.5, ax.get_xlim()[0] - 0.5, ax.get_xlim()[0]
+            name_ha_aln, scale_ha_aln = "left", "right"
+        else:
+            score_name_loc, scale_loc, vline_loc = ax.get_xlim()[0] - 0.5, ax.get_xlim()[1] + 0.5, ax.get_xlim()[1]
+            name_ha_aln, scale_ha_aln = "right", "left"
+        # score name
+        ax.text(score_name_loc, y_zero, score_name, ha=name_ha_aln, va='center')
+        # scale
+        ax.text(scale_loc, y_zero, "0", ha=scale_ha_aln, va='center')
+        ax.text(scale_loc, y_zero - genome_y_location / 4, -max_value, ha=scale_ha_aln, va='center', color='red')
+        ax.text(scale_loc, y_zero + genome_y_location / 4, max_value, ha=scale_ha_aln, va='center', color='blue')
+        plt.vlines(x=vline_loc, ymin=y_zero - genome_y_location / 4, ymax=y_zero + genome_y_location / 4, color='black', linewidth=2)
+        # add h line boundaries for scale
+        if score_count is 1:
+            plt.axhline(y=y_zero + genome_y_location / 4, color='grey', linestyle='--', linewidth=0.5)
+        plt.axhline(y=y_zero - genome_y_location / 4, color='grey', linestyle='--', linewidth=0.5)
+        # create zero line
+        plt.axhline(y=y_zero, color='black', linestyle='-', linewidth=0.5)
+        # create bars for scores
         for score in score_set:
             # define x value
             mutation_x_location = n_mutations / length * (score[0] - start)
-            # define y value
             # create lines for score_set
             if score[1] < 0:
                 plt.vlines(x=mutation_x_location, ymin=y_zero + score[1]/multiplier, ymax=y_zero, color="red", linestyle='-')
             else:
                 plt.vlines(x=mutation_x_location, ymin=y_zero, ymax=y_zero + score[1] / multiplier, color="blue", linestyle='-')
+
         return True
     # if not the track is not created
     else:
@@ -148,7 +166,7 @@ def create_mutation_legend(mutation_set, min_y_location, n_samples, n_scores):
     plt.legend(bbox_to_anchor=(1.01, 0.95-(n_samples/(min_y_location+n_samples+n_scores))), handles=legend_patches)
 
 
-def create_axis(ax, n_mutations, min_y_location, n_samples, file_names, start, stop, genome_y_location, unique_mutations, reference_name, n_scoresets=0):
+def create_axis(ax, n_mutations, min_y_location, n_samples, file_names, start, stop, genome_y_location, unique_mutations, reference_name):
     """
     create the axis of the plot
     """

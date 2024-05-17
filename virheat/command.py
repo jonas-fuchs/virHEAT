@@ -221,7 +221,7 @@ def main(sysargs=sys.argv[1:]):
     plotting.create_heatmap(ax, frequency_array, cmap_cells)
     mutation_set = plotting.create_genome_vis(ax, genome_y_location, n_mutations, unique_mutations, start, stop)
     plotting.create_axis(ax, n_mutations, min_y_location, n_samples, file_names, start, stop, genome_y_location,
-                         unique_mutations, reference_name, n_scores)
+                         unique_mutations, reference_name)
     plotting.create_mutation_legend(mutation_set, min_y_location, n_samples, n_scores)
     plotting.create_colorbar(args.threshold, cmap_cells, min_y_location, n_samples, ax)
     # plot gene track
