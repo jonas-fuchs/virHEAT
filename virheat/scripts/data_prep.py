@@ -100,7 +100,7 @@ def read_vcf(vcf_file):
     return vcf_dict
 
 
-def extract_vcf_data(vcf_files, threshold=0, scores=None):
+def extract_vcf_data(vcf_files, threshold=0, scores=False):
     """
     extract relevant vcf data
     """
@@ -118,7 +118,7 @@ def extract_vcf_data(vcf_files, threshold=0, scores=None):
                 continue
             if scores:
                 if vcf_dict['EFF'][idx] is not None:
-                    aa_change = vcf_dict['EFF'][idx].split('|')[3] # extract amino acid changes if provided
+                    aa_change = vcf_dict['EFF'][idx].split('|')[3]  # extract amino acid changes if provided
                 else:
                     aa_change = '-'
                 frequency_list.append(
@@ -228,6 +228,7 @@ def delete_common_mutations(frequency_array, unique_mutations):
 
     return np.delete(frequency_array, mut_to_del, axis=1)
 
+
 def delete_n_mutations(frequency_array, unique_mutations, min_mut):
     """
     delete mutations that are not present in more than n samples
@@ -260,6 +261,7 @@ def zoom_to_genomic_regions(unique_mutations, start_stop):
             zoomed_unique.append(mutation)
 
     return zoomed_unique
+
 
 def parse_gff3(file):
     """
