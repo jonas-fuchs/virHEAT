@@ -143,11 +143,15 @@ def main(sysargs=sys.argv[1:]):
 
     # extract vcf info
     n_scores = 0
-    if args.scores:
-        reference_name, frequency_lists, unique_mutations, file_names = data_prep.extract_vcf_data(vcf_files, threshold=args.threshold, scores=True)
-        n_scores = len(args.scores)
+    if not vcf_files:
+        sys.exit("\033[31m\033[1mERROR:\033[0m No VCF files provided")
     else:
-        reference_name, frequency_lists, unique_mutations, file_names = data_prep.extract_vcf_data(vcf_files, threshold=args.threshold)
+        if args.scores:
+            reference_name, frequency_lists, unique_mutations, file_names = data_prep.extract_vcf_data(vcf_files, threshold=args.threshold, scores=True)
+            n_scores = len(args.scores)
+        else:
+            reference_name, frequency_lists, unique_mutations, file_names = data_prep.extract_vcf_data(vcf_files, threshold=args.threshold)
+
     if args.zoom:
         unique_mutations = data_prep.zoom_to_genomic_regions(unique_mutations, args.zoom)
     frequency_array = data_prep.create_freq_array(unique_mutations, frequency_lists)
