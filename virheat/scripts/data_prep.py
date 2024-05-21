@@ -55,7 +55,11 @@ def read_vcf(vcf_file):
 
     # get header and values
     with open(vcf_file, "r") as f:
-        header = [l.split("\t") for l in f if l.startswith('#CHROM')][0]
+        header_lines = [l.split("\t") for l in f if l.startswith('#CHROM')]
+        if not header_lines:
+            print(f"\033[31m\033[1mWARNING:\033[0m {vcf_file} does not contain a '#CHROM' header!")
+            return {}
+        header = header_lines[0]
     # get each line as frequency_lists
     with open(vcf_file, "r") as f:
         lines = [l.split("\t") for l in f if not l.startswith('#')]
