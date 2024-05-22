@@ -55,7 +55,11 @@ def read_vcf(vcf_file):
 
     # get header and values
     with open(vcf_file, "r") as f:
-        header = [l.split("\t") for l in f if l.startswith('#CHROM')][0]
+        header_lines = [l.split("\t") for l in f if l.startswith('#CHROM')]
+        if not header_lines:
+            print(f"\033[31m\033[1mWARNING:\033[0m {vcf_file} does not contain a '#CHROM' header!")
+            return {}
+        header = header_lines[0]
     # get each line as frequency_lists
     with open(vcf_file, "r") as f:
         lines = [l.split("\t") for l in f if not l.startswith('#')]
@@ -100,7 +104,7 @@ def read_vcf(vcf_file):
     return vcf_dict
 
 
-def extract_vcf_data(vcf_files, threshold=0):
+def extract_vcf_data(vcf_files, threshold=0, scores=False):
     """
     extract relevant vcf data
     """
@@ -116,9 +120,19 @@ def extract_vcf_data(vcf_files, threshold=0):
         for idx in range(0, len(vcf_dict["#CHROM"])):
             if not vcf_dict["AF"][idx] >= threshold:
                 continue
-            frequency_list.append(
-                (f"{vcf_dict['POS'][idx]}_{vcf_dict['REF'][idx]}_{vcf_dict['ALT'][idx]}_{vcf_dict['MUT_TYPE_'][idx]}", vcf_dict['AF'][idx])
-            )
+            if scores:
+                if vcf_dict['EFF'][idx] is not None:
+                    aa_change = vcf_dict['EFF'][idx].split('|')[3]  # extract amino acid changes if provided
+                else:
+                    aa_change = '-'
+                frequency_list.append(
+                    (f"{vcf_dict['POS'][idx]}_{vcf_dict['REF'][idx]}_{vcf_dict['ALT'][idx]}_{vcf_dict['MUT_TYPE_'][idx]}_{aa_change}", vcf_dict['AF'][idx])
+                )
+            else:
+                frequency_list.append(
+                    (f"{vcf_dict['POS'][idx]}_{vcf_dict['REF'][idx]}_{vcf_dict['ALT'][idx]}_{vcf_dict['MUT_TYPE_'][idx]}", vcf_dict['AF'][idx])
+                )
+
         frequency_lists.append(frequency_list)
     # sort by mutation index
     unique_mutations = sorted(
@@ -126,6 +140,29 @@ def extract_vcf_data(vcf_files, threshold=0):
     )
 
     return vcf_dict["#CHROM"][0], frequency_lists, unique_mutations, file_names
+
+
+def extract_scores(unique_mutations, scores_file, aa_pos_col, score_col):
+    """
+    Extract scores from scores_file which corresponding value from aa_pos_col is equal to unique_aa_mutations
+    """
+    scores_df = pd.read_csv(scores_file)
+
+    # create a dictionary to store the scores for each mutation
+    mutation_scores = {}
+    for idx, row in scores_df.iterrows():
+        mutation_scores[row[aa_pos_col]] = row[score_col]
+
+    unique_scores = []
+    for mutation in unique_mutations:
+        aa_mut = mutation.split('_')[4]
+        if aa_mut in mutation_scores:
+            score = mutation_scores[aa_mut]
+            unique_scores.append(f"{mutation}_{score}")
+        else:
+            unique_scores.append(f"{mutation}_nan")
+
+    return unique_scores
 
 
 def create_freq_array(unique_mutations, frequency_lists):
@@ -195,6 +232,7 @@ def delete_common_mutations(frequency_array, unique_mutations):
 
     return np.delete(frequency_array, mut_to_del, axis=1)
 
+
 def delete_n_mutations(frequency_array, unique_mutations, min_mut):
     """
     delete mutations that are not present in more than n samples
@@ -227,6 +265,7 @@ def zoom_to_genomic_regions(unique_mutations, start_stop):
             zoomed_unique.append(mutation)
 
     return zoomed_unique
+
 
 def parse_gff3(file):
     """

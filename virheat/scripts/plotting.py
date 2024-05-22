@@ -4,6 +4,7 @@ contains all plotting functions of virHEAT
 
 # BUILT-INS
 import math
+import numpy as np
 
 # LIBS
 import matplotlib.pyplot as plt
@@ -48,7 +49,6 @@ def create_genome_vis(ax, genome_y_location, n_mutations, unique_mutations, star
                             ec="none", fc="lightgrey"
                         )
     )
-
     # create mutation lines on the genome rectangle and the mapping to the respective cells
     x_start = 0
     length = stop - start
@@ -65,6 +65,61 @@ def create_genome_vis(ax, genome_y_location, n_mutations, unique_mutations, star
         x_start += 1
 
     return mutation_set
+
+
+def create_scores_vis(ax, genome_y_location, n_mutations, n_tracks, unique_mutations, start, stop, score_count, score_name):
+    """
+    create the scores rectangles, mappings to the reference
+    """
+    score_set = []
+    y_zero = -genome_y_location - (n_tracks + score_count + 1) * (genome_y_location / 2)  # zero line
+    length = stop - start
+
+    # create list of tuples [(nt pos, score)]
+    for mutation in unique_mutations:
+        mutation_attributes = mutation.split("_")
+        if not np.isnan(float(mutation_attributes[5])):
+            score_set.append((int(mutation_attributes[0]), float(mutation_attributes[5])))
+    # check if there is something to plot
+    if score_set:
+        # define normalization multiplier for the height of the score v lines
+        max_value = max([abs(score[1]) for score in score_set])  # max abs in score set
+        multiplier = max_value / abs((y_zero + genome_y_location / 4) - y_zero)
+        # add text for scale and score_name
+        if score_count % 2 == 0:
+            score_name_loc, scale_loc, vline_loc = ax.get_xlim()[1] + 0.5, ax.get_xlim()[0] - 0.5, ax.get_xlim()[0]
+            name_ha_aln, scale_ha_aln = "left", "right"
+        else:
+            score_name_loc, scale_loc, vline_loc = ax.get_xlim()[0] - 0.5, ax.get_xlim()[1] + 0.5, ax.get_xlim()[1]
+            name_ha_aln, scale_ha_aln = "right", "left"
+        # score name
+        ax.text(score_name_loc, y_zero, score_name, ha=name_ha_aln, va='center')
+        # scale
+        ax.text(scale_loc, y_zero, "0", ha=scale_ha_aln, va='center')
+        ax.text(scale_loc, y_zero - genome_y_location / 4, -max_value, ha=scale_ha_aln, va='center', color='red')
+        ax.text(scale_loc, y_zero + genome_y_location / 4, max_value, ha=scale_ha_aln, va='center', color='blue')
+        plt.vlines(x=vline_loc, ymin=y_zero - genome_y_location / 4, ymax=y_zero + genome_y_location / 4, color='black', linewidth=2)
+        # add h line boundaries for scale
+        if score_count is 1:
+            plt.axhline(y=y_zero + genome_y_location / 4, color='grey', linestyle='--', linewidth=0.5)
+        plt.axhline(y=y_zero - genome_y_location / 4, color='grey', linestyle='--', linewidth=0.5)
+        # create zero line
+        plt.axhline(y=y_zero, color='black', linestyle='-', linewidth=0.5)
+        # create bars for scores
+        for score in score_set:
+            # define x value
+            mutation_x_location = n_mutations / length * (score[0] - start)
+            # create lines for score_set
+            if score[1] < 0:
+                plt.vlines(x=mutation_x_location, ymin=y_zero + score[1]/multiplier, ymax=y_zero, color="red", linestyle='-')
+            else:
+                plt.vlines(x=mutation_x_location, ymin=y_zero, ymax=y_zero + score[1] / multiplier, color="blue", linestyle='-')
+
+        return True
+    # if not the track is not created
+    else:
+        print("\033[31m\033[1mERROR:\033[0m Seems like there are no scores in the score set '{}' corresponding to the plotted mutation positions.".format(score_name))
+        return False
 
 
 def create_colorbar(threshold, cmap, min_y_location, n_samples, ax):
@@ -96,7 +151,7 @@ def create_colorbar(threshold, cmap, min_y_location, n_samples, ax):
     cbar.set_ticklabels(labels)
 
 
-def create_mutation_legend(mutation_set, min_y_location, n_samples):
+def create_mutation_legend(mutation_set, min_y_location, n_samples, n_scores):
     """
     create a legend for the mutation type
     """
@@ -108,8 +163,7 @@ def create_mutation_legend(mutation_set, min_y_location, n_samples):
         legend_patches.append(patches.Patch(color="blue", label="INS"))
     if "SNV" in mutation_set:
         legend_patches.append(patches.Patch(color="dimgrey", label="SNV"))
-
-    plt.legend(bbox_to_anchor=(1.01, 0.95-(n_samples/(min_y_location+n_samples))), handles=legend_patches)
+    plt.legend(bbox_to_anchor=(1.01, 0.95-(n_samples/(min_y_location+n_samples+n_scores))), handles=legend_patches)
 
 
 def create_axis(ax, n_mutations, min_y_location, n_samples, file_names, start, stop, genome_y_location, unique_mutations, reference_name):
@@ -156,7 +210,7 @@ def create_axis(ax, n_mutations, min_y_location, n_samples, file_names, start, s
     ax.spines["left"].set_visible(False)
 
 
-def create_gene_vis(ax, genes_with_mutations, n_mutations, y_size, n_tracks, start, stop, min_y_location, genome_y_location, colors_genes):
+def create_gene_vis(ax, genes_with_mutations, n_mutations, y_size, n_tracks, start, stop, min_y_location, genome_y_location, colors_genes, n_scores):
     """
     create the vis for the gene
     """
@@ -170,7 +224,7 @@ def create_gene_vis(ax, genes_with_mutations, n_mutations, y_size, n_tracks, sta
             x_value = 0
         else:
             x_value = mult_factor*(genes_with_mutations[gene][0][0]-start)
-        y_value = -min_y_location+(n_tracks-genes_with_mutations[gene][1])*genome_y_location/2-genome_y_location/2
+        y_value = -min_y_location+(n_tracks+n_scores-genes_with_mutations[gene][1])*genome_y_location/2
         if genes_with_mutations[gene][0][1] > stop:
             width = n_mutations - x_value
         else:
