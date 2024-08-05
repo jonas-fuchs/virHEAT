@@ -47,7 +47,7 @@ def convert_string(string):
         return string
 
 
-def read_vcf(vcf_file):
+def read_vcf(vcf_file, reference):
     """
     parse vcf files to dictionary
     """
@@ -62,10 +62,10 @@ def read_vcf(vcf_file):
         header = header_lines[0]
     # get each line as frequency_lists
     with open(vcf_file, "r") as f:
-        lines = [l.split("\t") for l in f if not l.startswith('#')]
+        lines = [l.split("\t") for l in f if not l.startswith('#') and l.startswith(reference)]
     # check if vcf is empty
     if not lines:
-        print(f"\033[31m\033[1mWARNING:\033[0m {vcf_file} is empty!")
+        print(f"\033[31m\033[1mWARNING:\033[0m {vcf_file} has no variants with {reference} as #CHROM!")
     # get standard headers as keys
     for key in header[0:6]:
         vcf_dict[key] = []
@@ -104,7 +104,7 @@ def read_vcf(vcf_file):
     return vcf_dict
 
 
-def extract_vcf_data(vcf_files, threshold=0, scores=False):
+def extract_vcf_data(vcf_files, reference, threshold=0, scores=False):
     """
     extract relevant vcf data
     """
@@ -114,7 +114,7 @@ def extract_vcf_data(vcf_files, threshold=0, scores=False):
 
     for file in vcf_files:
         file_names.append(os.path.splitext(os.path.basename(file))[0])
-        vcf_dict = read_vcf(file)
+        vcf_dict = read_vcf(file, reference)
         frequency_list = []
         # write all mutation info in a '_' sep string
         for idx in range(0, len(vcf_dict["#CHROM"])):
@@ -138,8 +138,10 @@ def extract_vcf_data(vcf_files, threshold=0, scores=False):
     unique_mutations = sorted(
         {x[0] for li in frequency_lists for x in li}, key=lambda x: int(x.split("_")[0])
     )
+    if not unique_mutations:
+        sys.exit(f"\033[31m\033[1mERROR:\033[0m No unique mutations to {reference} found in all vcf files!")
 
-    return vcf_dict["#CHROM"][0], frequency_lists, unique_mutations, file_names
+    return frequency_lists, unique_mutations, file_names
 
 
 def extract_scores(unique_mutations, scores_file, aa_pos_col, score_col):
@@ -267,7 +269,7 @@ def zoom_to_genomic_regions(unique_mutations, start_stop):
     return zoomed_unique
 
 
-def parse_gff3(file):
+def parse_gff3(file, reference):
     """
     parse gff3 to dictionary
     """
@@ -280,6 +282,8 @@ def parse_gff3(file):
             if line.startswith("#") or line == "\n":
                 continue
             gff_values = line.split("\t")
+            if gff_values[0] != reference:
+                continue
             gff3_ref_name = gff_values[0]
             # create keys
             if gff_values[2] not in gff3_dict:
@@ -299,6 +303,9 @@ def parse_gff3(file):
             gff3_dict[gff_values[2]][attribute_id]["stop"] = int(gff_values[4])
 
     gff3_file.close()
+
+    if not gff3_dict:
+        sys.exit(f"\033[31m\033[1mERROR:\033[0m {reference} not found in gff3 file.")
 
     return gff3_dict, gff3_ref_name
 

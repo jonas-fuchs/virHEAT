@@ -33,6 +33,14 @@ def get_args(sysargs):
         help="folder containing input files and output folder"
     )
     parser.add_argument(
+        "-r",
+        "--reference",
+        type=str,
+        metavar="None",
+        default=None,
+        help="reference identifier"
+    )
+    parser.add_argument(
         "--name",
         type=str,
         metavar="virHEAT_plot.pdf",
@@ -147,10 +155,10 @@ def main(sysargs=sys.argv[1:]):
         sys.exit("\033[31m\033[1mERROR:\033[0m No VCF files provided")
     else:
         if args.scores:
-            reference_name, frequency_lists, unique_mutations, file_names = data_prep.extract_vcf_data(vcf_files, threshold=args.threshold, scores=True)
+            frequency_lists, unique_mutations, file_names = data_prep.extract_vcf_data(vcf_files, threshold=args.threshold, scores=True)
             n_scores = len(args.scores)
         else:
-            reference_name, frequency_lists, unique_mutations, file_names = data_prep.extract_vcf_data(vcf_files, threshold=args.threshold)
+            frequency_lists, unique_mutations, file_names = data_prep.extract_vcf_data(vcf_files, args.reference, threshold=args.threshold)
 
     if args.zoom:
         unique_mutations = data_prep.zoom_to_genomic_regions(unique_mutations, args.zoom)
@@ -178,10 +186,7 @@ def main(sysargs=sys.argv[1:]):
     if args.gff3_path is not None and args.genome_length is not None:
         sys.exit("\033[31m\033[1mERROR:\033[0m Do not provide the -g and -l argument simultaneously!")
     elif args.gff3_path is not None:
-        gff3_info, gff3_ref_name = data_prep.parse_gff3(args.gff3_path)
-        # issue a warning if #CHROM and gff3 do not match
-        if gff3_ref_name not in reference_name and reference_name not in gff3_ref_name:
-            print("\033[31m\033[1mWARNING:\033[0m gff3 reference does not match the vcf reference!")
+        gff3_info, gff3_ref_name = data_prep.parse_gff3(args.gff3_path, args.reference)
         genome_end = data_prep.get_genome_end(gff3_info)
         genes_with_mutations, n_tracks = data_prep.create_track_dict(unique_mutations, gff3_info, args.gff3_annotations)
     elif args.genome_length is not None:
@@ -225,7 +230,7 @@ def main(sysargs=sys.argv[1:]):
     plotting.create_heatmap(ax, frequency_array, cmap_cells)
     mutation_set = plotting.create_genome_vis(ax, genome_y_location, n_mutations, unique_mutations, start, stop)
     plotting.create_axis(ax, n_mutations, min_y_location, n_samples, file_names, start, stop, genome_y_location,
-                         unique_mutations, reference_name)
+                         unique_mutations, args.reference)
     plotting.create_mutation_legend(mutation_set, min_y_location, n_samples, n_scores)
     plotting.create_colorbar(args.threshold, cmap_cells, min_y_location, n_samples, ax)
     # plot gene track
