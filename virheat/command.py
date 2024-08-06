@@ -165,11 +165,13 @@ def main(sysargs=sys.argv[1:]):
         unique_mutations = data_prep.zoom_to_genomic_regions(unique_mutations, args.zoom)
     frequency_array = data_prep.create_freq_array(unique_mutations, frequency_lists)
 
-    # user specified delete options (removes mutations based on various rationales)
-    if args.delete:
-        frequency_array = data_prep.delete_common_mutations(frequency_array, unique_mutations)
-    if args.delete_n is not None:
-        frequency_array = data_prep.delete_n_mutations(frequency_array, unique_mutations, args.delete_n)
+    # enables the deletion option only if more than 1 vcf file is provided
+    if len(vcf_files) > 1:
+        # user specified delete options (removes mutations based on various rationales)
+        if args.delete:
+            frequency_array = data_prep.delete_common_mutations(frequency_array, unique_mutations)
+        if args.delete_n is not None:
+            frequency_array = data_prep.delete_n_mutations(frequency_array, unique_mutations, args.delete_n)
 
     # annotate low coverage if per base coverage from qualimap was provided
     data_prep.annotate_non_covered_regions(args.input[0], args.min_cov, frequency_array, file_names, unique_mutations)
