@@ -64,6 +64,8 @@ positional arguments:
 
 options:
   -h, --help            show this help message and exit
+  -r ref_id, --reference ref_id
+                        reference identifier
   --name virHEAT_plot.pdf
                         plot name and file type (pdf, png, svg, jpg). Default: virHEAT_plot.pdf
   -l None, --genome-length None
