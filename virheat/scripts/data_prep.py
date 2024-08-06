@@ -62,10 +62,10 @@ def read_vcf(vcf_file, reference):
         header = header_lines[0]
     # get each line as frequency_lists
     with open(vcf_file, "r") as f:
-        lines = [l.split("\t") for l in f if not l.startswith('#') and l.startswith(reference)]
+        lines = [l.split("\t") for l in f if l.startswith(reference)]
     # check if vcf is empty
     if not lines:
-        print(f"\033[31m\033[1mWARNING:\033[0m {vcf_file} has no variants with {reference} as #CHROM!")
+        print(f"\033[31m\033[1mWARNING:\033[0m {vcf_file} has no variants to {reference}!")
     # get standard headers as keys
     for key in header[0:6]:
         vcf_dict[key] = []
@@ -139,7 +139,7 @@ def extract_vcf_data(vcf_files, reference, threshold=0, scores=False):
         {x[0] for li in frequency_lists for x in li}, key=lambda x: int(x.split("_")[0])
     )
     if not unique_mutations:
-        sys.exit(f"\033[31m\033[1mERROR:\033[0m No unique mutations to {reference} found in all vcf files!")
+        sys.exit(f"\033[31m\033[1mERROR:\033[0m No variants to {reference} in all vcf files!")
 
     return frequency_lists, unique_mutations, file_names
 
@@ -279,12 +279,9 @@ def parse_gff3(file, reference):
     with open(file, "r") as gff3_file:
         for line in gff3_file:
             # ignore comments and last line
-            if line.startswith("#") or line == "\n":
+            if not line.startswith(reference):
                 continue
             gff_values = line.split("\t")
-            if gff_values[0] != reference:
-                continue
-            gff3_ref_name = gff_values[0]
             # create keys
             if gff_values[2] not in gff3_dict:
                 gff3_dict[gff_values[2]] = {}
@@ -307,7 +304,7 @@ def parse_gff3(file, reference):
     if not gff3_dict:
         sys.exit(f"\033[31m\033[1mERROR:\033[0m {reference} not found in gff3 file.")
 
-    return gff3_dict, gff3_ref_name
+    return gff3_dict
 
 
 def get_genome_end(gff3_dict):

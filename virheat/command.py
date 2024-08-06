@@ -36,7 +36,8 @@ def get_args(sysargs):
         "-r",
         "--reference",
         type=str,
-        metavar="None",
+        metavar="ref_id",
+        required=True,
         default=None,
         help="reference identifier"
     )
@@ -155,7 +156,7 @@ def main(sysargs=sys.argv[1:]):
         sys.exit("\033[31m\033[1mERROR:\033[0m No VCF files provided")
     else:
         if args.scores:
-            frequency_lists, unique_mutations, file_names = data_prep.extract_vcf_data(vcf_files, threshold=args.threshold, scores=True)
+            frequency_lists, unique_mutations, file_names = data_prep.extract_vcf_data(vcf_files, args.reference, threshold=args.threshold, scores=True)
             n_scores = len(args.scores)
         else:
             frequency_lists, unique_mutations, file_names = data_prep.extract_vcf_data(vcf_files, args.reference, threshold=args.threshold)
@@ -186,7 +187,7 @@ def main(sysargs=sys.argv[1:]):
     if args.gff3_path is not None and args.genome_length is not None:
         sys.exit("\033[31m\033[1mERROR:\033[0m Do not provide the -g and -l argument simultaneously!")
     elif args.gff3_path is not None:
-        gff3_info, gff3_ref_name = data_prep.parse_gff3(args.gff3_path, args.reference)
+        gff3_info = data_prep.parse_gff3(args.gff3_path, args.reference)
         genome_end = data_prep.get_genome_end(gff3_info)
         genes_with_mutations, n_tracks = data_prep.create_track_dict(unique_mutations, gff3_info, args.gff3_annotations)
     elif args.genome_length is not None:

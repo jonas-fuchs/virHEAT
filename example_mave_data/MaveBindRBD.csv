@@ -1,4 +1,4 @@
-accession,hgvs_nt,hgvs_splice,hgvs_pro,score,average,library,AA
+exaccession,hgvs_nt,hgvs_splice,hgvs_pro,score,average,library,AA
 urn:mavedb:00000044-a-1#7954,NA,NA,p.Lys199Val,0.09,0.07,2,K529V
 urn:mavedb:00000044-a-1#7955,NA,NA,p.Lys199Trp,-0.02,0,1,K529W
 urn:mavedb:00000044-a-1#7956,NA,NA,p.Lys199Trp,0.01,0,2,K529W
