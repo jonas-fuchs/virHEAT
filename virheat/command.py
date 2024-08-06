@@ -174,7 +174,7 @@ def main(sysargs=sys.argv[1:]):
             frequency_array = data_prep.delete_n_mutations(frequency_array, unique_mutations, args.delete_n)
 
     # annotate low coverage if per base coverage from qualimap was provided
-    data_prep.annotate_non_covered_regions(args.input[0], args.min_cov, frequency_array, file_names, unique_mutations)
+    data_prep.annotate_non_covered_regions(args.input[0], args.min_cov, frequency_array, file_names, unique_mutations, args.reference)
 
     # define relative locations of all items in the plot
     n_samples, n_mutations = len(frequency_array), len(frequency_array[0])

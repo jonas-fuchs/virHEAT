@@ -187,7 +187,7 @@ def create_freq_array(unique_mutations, frequency_lists):
     return np.array(frequency_array)
 
 
-def annotate_non_covered_regions(coverage_dir, min_coverage, frequency_array, file_names, unique_mutations):
+def annotate_non_covered_regions(coverage_dir, min_coverage, frequency_array, file_names, unique_mutations, reference):
     """
     Insert nan values into np array if position is not covered. Needs
     per base coverage tsv files created by bamqc
@@ -202,6 +202,7 @@ def annotate_non_covered_regions(coverage_dir, min_coverage, frequency_array, fi
                 continue
             tsv_file = [file for file in per_base_coverage_files if os.path.splitext(os.path.basename(file))[0] == file_name][0]
             coverage = pd.read_csv(tsv_file, sep="\t")
+            coverage = coverage[coverage["#chr"] == reference]
             for j, (mutation, frequency) in enumerate(zip(unique_mutations, array)):
                 mut_pos = int(mutation.split("_")[0])
                 if coverage[coverage["pos"] == mut_pos].empty or all([frequency == 0, coverage[coverage["pos"] == mut_pos]["coverage"].iloc[0] <= min_coverage]):
