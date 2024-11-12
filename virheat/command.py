@@ -26,7 +26,7 @@ def get_args(sysargs):
     """
     parser = argparse.ArgumentParser(
         prog=_program,
-        usage='''\tvirheat <folder containing input files (vcf/tsv)> <output dir> -l or -g [additional arguments]''')
+        usage='''\tvirheat <folder containing input files (vcf/tsv)> <output dir> -r -l/-g [additional arguments]''')
     parser.add_argument(
         "input",
         nargs=2,
