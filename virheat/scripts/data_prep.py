@@ -108,10 +108,10 @@ def read_vcf(vcf_file, reference):
                 val_list = val.split(',')
                 for value in val_list:
                     vcf_dict[key].append(convert_string(value))
-                    visited_keys.append(key)
-        # append none for ech none visited key
+                visited_keys.append(key)
+        # append none for each none visited key in the INFO field
         for key in [k for k in vcf_dict.keys() if k not in visited_keys]:
-            vcf_dict[key].append(None)
+            vcf_dict[key].extend([None]*length_variants)
 
     return vcf_dict
 
