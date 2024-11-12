@@ -55,14 +55,14 @@ def read_vcf(vcf_file, reference):
 
     # get header and values
     with open(vcf_file, "r") as f:
-        header_lines = [l.split("\t") for l in f if l.startswith('#CHROM')]
+        header_lines = [l.strip().split("\t") for l in f if l.startswith('#CHROM')]
         if not header_lines:
             print(f"\033[31m\033[1mWARNING:\033[0m {vcf_file} does not contain a '#CHROM' header!")
             return {}
         header = header_lines[0]
     # get each line as frequency_lists
     with open(vcf_file, "r") as f:
-        lines = [l.split("\t") for l in f if l.startswith(reference)]
+        lines = [l.strip().split("\t") for l in f if l.startswith(reference)]
     # check if vcf is empty
     if not lines:
         print(f"\033[31m\033[1mWARNING:\033[0m {vcf_file} has no variants to {reference}!")
@@ -80,23 +80,35 @@ def read_vcf(vcf_file, reference):
     for line in lines:
         # remember keys that have an entry already
         visited_keys = []
+        # check if there are multiple called variants at a single position
+        # separated by a comma
+        length_variants = len(line[4].split(','))
         for idx, key in enumerate(header[0:6]):
-            vcf_dict[key].append(convert_string(line[idx]))
+            sublines = line[idx].split(',')
+            for i in range(length_variants):
+                try:
+                    vcf_dict[key].append(convert_string(sublines[i]))
+                except IndexError:
+                    vcf_dict[key].append(convert_string(sublines[0]))
         # get mutation type
-        if len(line[3]) == len(line[4]):
-            vcf_dict["MUT_TYPE_"].append("SNV")
-        elif len(line[3]) < len(line[4]):
-            vcf_dict["MUT_TYPE_"].append("INS")
-        elif len(line[3]) > len(line[4]):
-            vcf_dict["MUT_TYPE_"].append("DEL")
+        mutations = line[4].split(',')
+        for mutation in mutations:
+            if len(line[3]) == len(mutation):
+                vcf_dict["MUT_TYPE_"].append("SNV")
+            elif len(line[3]) < len(mutation):
+                vcf_dict["MUT_TYPE_"].append("INS")
+            elif len(line[3]) > len(mutation):
+                vcf_dict["MUT_TYPE_"].append("DEL")
         visited_keys.extend(header[0:6])
         visited_keys.append("MUT_TYPE_")
         # get data from info field
         for info in line[7].split(";"):
             if "=" in info:
                 key, val = info.split("=")
-                vcf_dict[key].append(convert_string(val))
-                visited_keys.append(key)
+                val_list = val.split(',')
+                for value in val_list:
+                    vcf_dict[key].append(convert_string(value))
+                    visited_keys.append(key)
         # append none for ech none visited key
         for key in [k for k in vcf_dict.keys() if k not in visited_keys]:
             vcf_dict[key].append(None)
