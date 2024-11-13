@@ -297,8 +297,7 @@ def parse_gff3(file, reference):
             gff_values = line.strip().split("\t")
             # sanity check that the line has a unique ID for the dict key
             # this is a lazy fix as it will exclude e.g. exons without ID and
-            # only a parent -> fixing this might require more complex parsing
-            # and data structure
+            # only a parent
             if not gff_values[8].startswith("ID="):
                 continue
             # create keys
