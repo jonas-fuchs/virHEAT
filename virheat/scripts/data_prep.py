@@ -294,7 +294,13 @@ def parse_gff3(file, reference):
             # ignore comments and last line
             if not line.startswith(reference):
                 continue
-            gff_values = line.split("\t")
+            gff_values = line.strip().split("\t")
+            # sanity check that the line has a unique ID for the dict key
+            # this is a lazy fix as it will exclude e.g. exons without ID and
+            # only a parent -> fixing this might require more complex parsing
+            # and data structure
+            if not gff_values[8].startswith("ID="):
+                continue
             # create keys
             if gff_values[2] not in gff3_dict:
                 gff3_dict[gff_values[2]] = {}
