@@ -309,10 +309,10 @@ def parse_gff3(file, reference):
                 # create a new dict for each ID
                 if identifier == "ID" and identifier not in gff3_dict:
                     attribute_id = val
-                    gff3_dict[gff_values[2]][attribute_id] = {}
+                    gff3_dict[gff_values[2]][val] = {}
                 # add attributes
                 if identifier != "ID":
-                    gff3_dict[gff_values[2]][attribute_id][identifier] = val.replace("\n", "")
+                    gff3_dict[gff_values[2]][attribute_id][identifier] = val
             # add start, stop and strand
             gff3_dict[gff_values[2]][attribute_id]["start"] = int(gff_values[3])
             gff3_dict[gff_values[2]][attribute_id]["stop"] = int(gff_values[4])
