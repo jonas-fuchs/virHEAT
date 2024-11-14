@@ -210,7 +210,7 @@ def create_axis(ax, n_mutations, min_y_location, n_samples, file_names, start, s
     ax.spines["left"].set_visible(False)
 
 
-def create_gene_vis(ax, genes_with_mutations, n_mutations, y_size, n_tracks, start, stop, min_y_location, genome_y_location, colors_genes, n_scores, show_arrows = True):
+def create_gene_vis(ax, genes_with_mutations, n_mutations, y_size, n_tracks, start, stop, min_y_location, genome_y_location, colors_genes, n_scores, show_arrows):
     """
     create the vis for the gene
     """
