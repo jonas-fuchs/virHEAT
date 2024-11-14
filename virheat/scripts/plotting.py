@@ -218,7 +218,7 @@ def create_gene_vis(ax, genes_with_mutations, n_mutations, y_size, n_tracks, sta
     gene_annotations = []
     mult_factor = n_mutations/(stop-start)
     # define arrow head length for all arrows
-    # dependend on how long the relative genes are to each other. If they are similar in length, it is roughly one 8th
+    # dependent on how long the relative genes are to each other. If they are similar in length, it is roughly 1/8
     # of the shortest gene to display.
     if show_arrows:
         all_gene_lengths = [genes_with_mutations[x][0][1]-genes_with_mutations[x][0][0] for x in genes_with_mutations.keys()]
