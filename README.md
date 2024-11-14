@@ -74,6 +74,8 @@ options:
                         path to gff3 (needed if length is not provided)
   -a [gene ...], --gff3-annotations [gene ...]
                         annotations to display from gff3 file (standard: gene). Multiple possible.
+  --gene-arrows, --no-gene-arrows
+                        show genes in arrow format (only if the -g argument is provided) (default: False)
   -t 0, --threshold 0   display frequencies above this threshold (0-1)
   --delete, --no-delete
                         delete mutations that are present in all samples and their maximum frequency divergence is smaller than 0.5 (default: True)

@@ -316,6 +316,7 @@ def parse_gff3(file, reference):
             # add start, stop and strand
             gff3_dict[gff_values[2]][attribute_id]["start"] = int(gff_values[3])
             gff3_dict[gff_values[2]][attribute_id]["stop"] = int(gff_values[4])
+            gff3_dict[gff_values[2]][attribute_id]["strand"] = gff_values[6]
 
     gff3_file.close()
 
@@ -350,7 +351,6 @@ def create_track_dict(unique_mutations, gff3_info, annotation_type):
 
     # find genes that have a mutation
     genes_with_mutations = set()
-
     for mutation in unique_mutations:
         # get the mutation from string
         mutation = int(mutation.split("_")[0])
@@ -366,7 +366,8 @@ def create_track_dict(unique_mutations, gff3_info, annotation_type):
                     genes_with_mutations.add(
                         (attribute_name,
                          gff3_info[type][annotation]["start"],
-                         gff3_info[type][annotation]["stop"])
+                         gff3_info[type][annotation]["stop"],
+                         gff3_info[type][annotation]["strand"])
                     )
     if not genes_with_mutations:
         print("\033[31m\033[1mWARNING:\033[0m either the annotation types were not found in gff3 or the mutations are not within genes.")

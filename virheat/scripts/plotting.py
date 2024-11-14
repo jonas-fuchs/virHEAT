@@ -210,13 +210,26 @@ def create_axis(ax, n_mutations, min_y_location, n_samples, file_names, start, s
     ax.spines["left"].set_visible(False)
 
 
-def create_gene_vis(ax, genes_with_mutations, n_mutations, y_size, n_tracks, start, stop, min_y_location, genome_y_location, colors_genes, n_scores):
+def create_gene_vis(ax, genes_with_mutations, n_mutations, y_size, n_tracks, start, stop, min_y_location, genome_y_location, colors_genes, n_scores, show_arrows = True):
     """
     create the vis for the gene
     """
 
     gene_annotations = []
     mult_factor = n_mutations/(stop-start)
+    # define arrow head length for all arrows
+    # dependend on how long the relative genes are to each other. If they are similar in length, it is roughly one 8th
+    # of the shortest gene to display.
+    if show_arrows:
+        all_gene_lengths = [genes_with_mutations[x][0][1]-genes_with_mutations[x][0][0] for x in genes_with_mutations.keys()]
+        if min(all_gene_lengths)*20 < max(all_gene_lengths):
+            head_length = mult_factor*min(all_gene_lengths)
+        elif min(all_gene_lengths)*10 < max(all_gene_lengths):
+            head_length = mult_factor * min(all_gene_lengths) * 0.6
+        elif min(all_gene_lengths)*5 < max(all_gene_lengths):
+            head_length = mult_factor * min(all_gene_lengths) * 0.3
+        else:
+            head_length = mult_factor * min(all_gene_lengths) * 0.15
 
     for idx, gene in enumerate(genes_with_mutations):
         # define the plotting values for the patch
@@ -231,13 +244,25 @@ def create_gene_vis(ax, genes_with_mutations, n_mutations, y_size, n_tracks, sta
             width = mult_factor*(genes_with_mutations[gene][0][1]-start) - x_value
         height = genome_y_location/2
         # plot the patch
-        ax.add_patch(
-            patches.FancyBboxPatch(
-                                (x_value, y_value), width, height,
-                                boxstyle="round,pad=-0.0040,rounding_size=0.03",
-                                ec="black", fc=colors_genes[idx]
-                            )
-        )
+        if not show_arrows:
+            ax.add_patch(
+                patches.FancyBboxPatch(
+                                    (x_value, y_value), width, height,
+                                    boxstyle="round,pad=-0.0040,rounding_size=0.03",
+                                    ec="black", fc=colors_genes[idx]
+                                )
+            )
+        else:
+            if genes_with_mutations[gene][0][2] == '-':
+                x_value_arrow, arrow_width = x_value + width, -width
+            else:
+                x_value_arrow, arrow_width = x_value, width
+            ax.add_patch(
+                patches.FancyArrow(
+                    x_value_arrow, y_value + height/2, dx=arrow_width,dy=0, width=height*0.7, head_width=height, head_length=head_length, length_includes_head=True,
+                    ec="black", fc=colors_genes[idx]
+                )
+            )
         # define text pos for gene description inside or below the gene box, depending if it fits within
         if width > n_mutations/(y_size*8)*len(gene):
             gene_annotations.append(ax.text(x_value+width/2, y_value+height/2, gene, ha="center", va="center"))
