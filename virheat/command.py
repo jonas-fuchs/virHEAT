@@ -75,6 +75,12 @@ def get_args(sysargs):
         help="annotations to display from gff3 file (standard: gene). Multiple possible."
     )
     parser.add_argument(
+        "--gene-arrows",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="show genes as arrows"
+    )
+    parser.add_argument(
         "-t",
         "--threshold",
         type=float,
@@ -243,7 +249,7 @@ def main(sysargs=sys.argv[1:]):
             cmap_genes = plt.get_cmap('tab20', len(genes_with_mutations))
             colors_genes = [cmap_genes(i) for i in range(len(genes_with_mutations))]
             # plot gene track
-            plotting.create_gene_vis(ax, genes_with_mutations, n_mutations, y_size, n_tracks, start, stop, min_y_location, genome_y_location, colors_genes, n_scores)
+            plotting.create_gene_vis(ax, genes_with_mutations, n_mutations, y_size, n_tracks, start, stop, min_y_location, genome_y_location, colors_genes, n_scores, show_arrows=args.gene_arrows)
     # plot scores as track below the gene/genome track
     if args.scores:
         score_count = 1
