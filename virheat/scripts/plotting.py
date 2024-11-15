@@ -218,17 +218,16 @@ def create_gene_vis(ax, genes_with_mutations, n_mutations, y_size, n_tracks, sta
     gene_annotations = []
     mult_factor = n_mutations/(stop-start)
     # define arrow head length for all arrows
-    # dependent on how long the relative genes are to each other. If they are similar in length, it is roughly 1/8
+    # dependent on how long the relative genes are to each other. If they are similar in length, it is 15%
     # of the shortest gene to display.
     if show_arrows:
-        all_gene_lengths = [genes_with_mutations[x][0][1]-genes_with_mutations[x][0][0] for x in genes_with_mutations.keys()]
-        if min(all_gene_lengths)*20 < max(all_gene_lengths):
-            head_length = mult_factor*min(all_gene_lengths)
-        elif min(all_gene_lengths)*10 < max(all_gene_lengths):
-            head_length = mult_factor * min(all_gene_lengths) * 0.6
-        elif min(all_gene_lengths)*5 < max(all_gene_lengths):
-            head_length = mult_factor * min(all_gene_lengths) * 0.3
-        else:
+        all_gene_lengths, mult_detected = [genes_with_mutations[x][0][1]-genes_with_mutations[x][0][0] for x in genes_with_mutations.keys()], False
+
+        for min_len_mult, head_len_mult in zip([20, 10, 5], [1, 0.6, 0.3]):
+            if min(all_gene_lengths)*min_len_mult < max(all_gene_lengths):
+                head_length, mult_detected = mult_factor * min(all_gene_lengths) * head_len_mult, True
+                break
+        if not mult_detected:
             head_length = mult_factor * min(all_gene_lengths) * 0.15
 
     for idx, gene in enumerate(genes_with_mutations):
