@@ -107,8 +107,12 @@ def read_vcf(vcf_file, reference):
             if "=" in info:
                 key, val = info.split("=")
                 val_list = val.split(',')
-                for value in val_list:
-                    vcf_dict[key].append(convert_string(value))
+                # only try to split the info field if there was more than 1 variant  detected (e.g. with FreeBayes)
+                if length_variants > 1:
+                    for value in val_list:
+                        vcf_dict[key].append(convert_string(value))
+                else:
+                    vcf_dict[key].append(convert_string(val))
                 visited_keys.append(key)
         # append none for each none visited key in the INFO field
         for key in [k for k in vcf_dict.keys() if k not in visited_keys]:

@@ -18,9 +18,21 @@ Ever wanted to have a condensed look at variant frequencies after mapping your r
 
 ## SARS-CoV-2 example:
 
+```shell
+# reproduce with test data
+virheat example_data/ test/ -r NC_045512 -g example_data/SARS-CoV-2.gff3 -t 0.2 1
+```
+
 ![Example](./example_data/example.png)
 
 ## SARS-CoV-2 example with additional score tracks `--scores`
+
+This is a very specific use case. Have a look at the raw data if it is useful for you.
+
+```shell
+# reproduce with test data
+virheat example_mave_data/ output/ -r NC_045512 -g example_mave_data/SARS-CoV-2.gff3 --scores example_mave_data/MaveExpRBD.csv AA score MAVEexpression -z 20000 25000 -t 0.4 1
+```
 
 ![Example_Scores](./example_mave_data/example_scores.png)
 
