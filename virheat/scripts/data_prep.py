@@ -92,6 +92,7 @@ def read_vcf(vcf_file, reference):
                     vcf_dict[key].append(convert_string(sublines[0]))
         # get mutation type
         mutations = line[4].split(',')
+
         for mutation in mutations:
             if len(line[3]) == len(mutation):
                 vcf_dict["MUT_TYPE_"].append("SNV")
@@ -106,8 +107,12 @@ def read_vcf(vcf_file, reference):
             if "=" in info:
                 key, val = info.split("=")
                 val_list = val.split(',')
-                for value in val_list:
-                    vcf_dict[key].append(convert_string(value))
+                # only try to split the info field if there was more than 1 variant  detected (e.g. with FreeBayes)
+                if length_variants > 1:
+                    for value in val_list:
+                        vcf_dict[key].append(convert_string(value))
+                else:
+                    vcf_dict[key].append(convert_string(val))
                 visited_keys.append(key)
         # append none for each none visited key in the INFO field
         for key in [k for k in vcf_dict.keys() if k not in visited_keys]:
@@ -116,11 +121,13 @@ def read_vcf(vcf_file, reference):
     return vcf_dict
 
 
-def extract_vcf_data(vcf_files, reference, threshold=0, scores=False):
+def extract_vcf_data(vcf_files, reference, threshold=None, scores=False):
     """
     extract relevant vcf data
     """
 
+    if threshold is None:
+        threshold = [0, 1]
     file_names = []
     frequency_lists = []
 
@@ -130,7 +137,7 @@ def extract_vcf_data(vcf_files, reference, threshold=0, scores=False):
         frequency_list = []
         # write all mutation info in a '_' sep string
         for idx in range(0, len(vcf_dict["#CHROM"])):
-            if not vcf_dict["AF"][idx] >= threshold:
+            if not threshold[0] <= vcf_dict["AF"][idx] <= threshold[1]:
                 continue
             if scores:
                 if vcf_dict['EFF'][idx] is not None:
@@ -168,6 +175,7 @@ def extract_scores(unique_mutations, scores_file, aa_pos_col, score_col):
         mutation_scores[row[aa_pos_col]] = row[score_col]
 
     unique_scores = []
+
     for mutation in unique_mutations:
         aa_mut = mutation.split('_')[4]
         if aa_mut in mutation_scores:

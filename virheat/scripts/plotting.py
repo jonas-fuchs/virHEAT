@@ -122,30 +122,37 @@ def create_scores_vis(ax, genome_y_location, n_mutations, n_tracks, unique_mutat
         return False
 
 
-def create_colorbar(threshold, cmap, min_y_location, n_samples, ax):
+def create_colorbar(thresholds, cmap, min_y_location, n_samples, ax):
     """
     creates a custom colorbar and annotates the threshold
     """
+
+    rounded_thresholds = []
+
     if n_samples >= 8:
         ticks = [0, 0.2, 0.4, 0.6, 0.8, 1]
         labels = [0, 0.2, 0.4, 0.6, 0.8, 1]
-        if threshold + 0.1 in ticks or threshold - 0.1 in ticks:
-            rounded_threshold = threshold
-        else:
-            rounded_threshold = round(threshold * 5) / 5
+        for i, threshold in enumerate(thresholds):
+            if threshold + 0.1 in ticks or threshold - 0.1 in ticks:
+                rounded_thresholds.append(threshold)
+            else:
+                rounded_thresholds.append((threshold * 5) / 5)
     else:
         ticks = [0, 0.5, 1]
         labels = [0, 0.5, 1]
-        if threshold + 0.25 in ticks or threshold - 0.25 in ticks:
-            rounded_threshold = threshold
-        else:
-            rounded_threshold = round(threshold * 2) / 2
+        for i, threshold in enumerate(thresholds):
+            if threshold + 0.25 in ticks or threshold - 0.25 in ticks:
+                rounded_thresholds.append(threshold)
+            else:
+                rounded_thresholds.append(round(threshold * 2) / 2)
 
-    if rounded_threshold in ticks:
-        ticks.remove(rounded_threshold)
-        labels.remove(rounded_threshold)
-    ticks.append(threshold)
-    labels.append(f"threshold\n={threshold}")
+    for rounded_threshold in rounded_thresholds:
+        if rounded_threshold in ticks:
+            ticks.remove(rounded_threshold)
+            labels.remove(rounded_threshold)
+    for threshold, ttype in zip(thresholds, ['lower', 'upper']):
+        ticks.append(threshold)
+        labels.append(f"{ttype} threshold\n={threshold}")
     cbar = plt.colorbar(cmap, label="variant frequency", pad=0, shrink=n_samples/(min_y_location+n_samples), anchor=(0.1,1), aspect=15, ax=ax)
     cbar.set_ticks(ticks)
     cbar.set_ticklabels(labels)

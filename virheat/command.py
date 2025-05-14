@@ -11,7 +11,6 @@ import argparse
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from matplotlib import colors
-from matplotlib import colormaps
 
 # virHEAT
 from virheat.scripts import data_prep
@@ -84,9 +83,10 @@ def get_args(sysargs):
         "-t",
         "--threshold",
         type=float,
-        metavar="0",
-        default=0,
-        help="display frequencies above this threshold (0-1)"
+        nargs=2,
+        metavar='',
+        default=[0,1],
+        help="display variant frequencies between upper and lower thresholds (0-1)"
     )
     parser.add_argument(
         "--delete",
@@ -128,7 +128,7 @@ def get_args(sysargs):
         metavar=('scores_file', 'pos_col', 'score_col', 'score_name'),
         nargs=4,
         action='append',
-        help="specify scores to be added to the plot by providing a CSV file containing scores, along with its column for amino-acid positions, its column for scores, and descriptive score names (e.g., expression, binding, antibody escape, etc.). This option can be used multiple times to include multiple sets of scores."
+        help="Experimental setting (specific for SARS-CoV-2)! Specify scores to be added to the plot by providing a CSV file containing scores, along with its column for amino-acid positions, its column for scores, and descriptive score names (e.g., expression, binding, antibody escape, etc.). This option can be used multiple times to include multiple sets of scores."
     )
     parser.add_argument(
         "-v",
@@ -155,6 +155,20 @@ def main(sysargs=sys.argv[1:]):
     vcf_files = data_prep.get_files(args.input[0], "vcf")
     if args.sort:
         vcf_files = sorted(vcf_files, key=lambda x: data_prep.get_digit_and_alpha(os.path.basename(x)))
+
+    # some sanity checks for arguments
+    if args.threshold[0] >= args.threshold[1]:
+        sys.exit('\033[31m\033[1mERROR:\033[0m Upper threshold must be greater than lower threshold')
+    for threshold in args.threshold:
+        if not 0 <= threshold <= 1:
+            sys.exit('\033[31m\033[1mERROR:\033[0m Thresholds must be between 0 and 1')
+    if args.zoom:
+        if args.zoom[0] >= args.zoom[1]:
+            sys.exit('\033[31m\033[1mERROR:\033[0m Upper zoom must be greater than lower zoom.')
+        if args.zoom[0] < 0 or args.zoom[1] < 0:
+            sys.exit('\033[31m\033[1mERROR:\033[0m No negative zoom levels allowed.')
+    if args.min_cov < 0:
+        sys.exit('\033[31m\033[1mERROR:\033[0m Min coverage must be greater than zero.')
 
     # extract vcf info
     n_scores = 0
@@ -203,6 +217,11 @@ def main(sysargs=sys.argv[1:]):
         n_tracks = 0
     else:
         sys.exit("\033[31m\033[1mERROR:\033[0m Provide either a gff3 file (-g) or the length (-l) of the genome which you used for mapping")
+
+    # final sanity check for zoom levels
+    if args.zoom:
+        if args.zoom[1] > genome_end:
+            sys.exit('\033[31m\033[1mERROR:\033[0m Zoom upper level cannot be greater than reference length.')
 
     # define min y coordinate
     if n_tracks != 0 or n_scores != 0:
