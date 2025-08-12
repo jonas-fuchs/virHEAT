@@ -16,7 +16,6 @@ from matplotlib import colors
 from virheat.scripts import data_prep
 from virheat.scripts import plotting
 from virheat import __version__
-from . import _program
 
 
 def get_args(sysargs):
@@ -24,7 +23,6 @@ def get_args(sysargs):
     arg parsing for virheat
     """
     parser = argparse.ArgumentParser(
-        prog=_program,
         usage='''\tvirheat <folder containing input files (vcf/tsv)> <output dir> -r -l/-g [additional arguments]''')
     parser.add_argument(
         "input",

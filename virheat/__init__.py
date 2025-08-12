@@ -1,3 +1,9 @@
-"""plot vcf data as a heatmap mapped to a virus genome"""
-_program = "virheat"
-__version__ = "0.7.4"
+import importlib.metadata, pathlib, tomllib
+
+# get __version__ from pyproject.toml
+source_location = pathlib.Path("__file__").parent
+if (source_location.parent / "pyproject.toml").exists():
+    with open(source_location.parent / "pyproject.toml", "rb") as f:
+        __version__ = tomllib.load(f)['project']['version']
+else:
+    __version__ = importlib.metadata.version("virheat")
