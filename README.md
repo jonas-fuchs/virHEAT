@@ -1,5 +1,5 @@
 [![DOI](https://zenodo.org/badge/639918477.svg)](https://zenodo.org/badge/latestdoi/639918477)
-[![language](https://img.shields.io/badge/python-%3E3.11-green)](https://www.python.org/)
+[![language](https://img.shields.io/badge/python-%3E3.9-green)](https://www.python.org/)
 [![License: GPL v3](https://img.shields.io/github/license/jonas-fuchs/virheat)](https://www.gnu.org/licenses/gpl-3.0)
 [![pypi version](https://img.shields.io/pypi/v/virheat)](https://pypi.org/project/virheat/)
 [![pypi version](https://static.pepy.tech/badge/virheat)](https://pypi.org/project/virheat/)
@@ -115,5 +115,6 @@ please refer to the files located in the  [example_data/example_mave_data](examp
 **Important disclaimer:**
 *The code is under the GPLv3 licence. The code is WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.*
+
 
 
