@@ -50,8 +50,6 @@ conda install -c bioconda virheat
 ```shell
 git clone https://github.com/jonas-fuchs/virHEAT
 cd virHEAT
-pip install -r requirements.txt
-# or
 pip install .
 ```
 That was already it. To check if it worked:
@@ -117,3 +115,4 @@ please refer to the files located in the  [example_data/example_mave_data](examp
 **Important disclaimer:**
 *The code is under the GPLv3 licence. The code is WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.*
+
