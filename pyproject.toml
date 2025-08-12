@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = 'virheat'
-version = '0.7.5'
+version = '0.7.5-patch'
 description = 'virHEAT creates a heatmap from vcf files and maps positions on to a reference genome.'
 keywords = ['vcf, snp, evolution']
 dependencies = ['matplotlib>=3.5.1', 'numpy>=1.23.3', 'pandas>=1.4.4']
